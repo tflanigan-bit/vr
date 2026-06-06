@@ -994,7 +994,7 @@ function detectGameMode(gp) {
 
     // 3. Page title contains game keywords
     const title = (doc.title || '').toLowerCase();
-    const gameKeywords = ['game','play','level','score','lives','health','fps','pvp','rpg','mmo','minecraft','roblox','fortnite','chess'];
+    const gameKeywords = ['fortnite', 'NSFW'];
     const titleMatch = gameKeywords.some(k => title.includes(k));
 
     const isGame = pointerLocked || hasFullCanvas || titleMatch;
@@ -1055,31 +1055,29 @@ function updateCursorPos() {
 // Fire a synthetic click at the cursor's current position in the iframe
 function cursorClick(frameEl) {
   if (!frameEl) return;
-  try {
-    const doc = frameEl.contentWindow?.document;
-    if (!doc) return;
-    const rect = frameEl.getBoundingClientRect();
-    const scale = S.zoom / 100;
-    // Convert cursor normalized pos → actual iframe document coords
-    const ix = (CUR.x * rect.width)  / scale;
-    const iy = (CUR.y * rect.height) / scale;
-    const el = doc.elementFromPoint(ix, iy);
-    if (el) {
-      el.dispatchEvent(new MouseEvent('mouseover', {bubbles:true, clientX:ix, clientY:iy}));
-      el.dispatchEvent(new MouseEvent('mousedown', {bubbles:true, clientX:ix, clientY:iy}));
-      el.dispatchEvent(new MouseEvent('mouseup',   {bubbles:true, clientX:ix, clientY:iy}));
-      el.click();
-      // If it's a link, follow it
-      const link = el.closest('a[href]');
-      if (link) { try { link.click(); } catch {} }
-    }
-    // Flash cursor
-    const cur = document.getElementById('vcursor');
-    cur.classList.add('click');
-    setTimeout(() => cur.classList.remove('click'), 200);
-  } catch {}
-}
 
+  const cur = document.getElementById('vcursor');
+  const curR = document.getElementById('vcursor-r');
+
+  try {
+    frameEl.contentWindow.postMessage({
+      type: 'VOID_CURSOR_CLICK',
+      x: CUR.x,
+      y: CUR.y
+    }, '*');
+
+    cur?.classList.add('click');
+    curR?.classList.add('click');
+
+    setTimeout(() => {
+      cur?.classList.remove('click');
+      curR?.classList.remove('click');
+    }, 180);
+
+  } catch (e) {
+    console.error('Cursor click failed', e);
+  }
+}
 // Standard Gamepad API button labels + auto-mapped default actions
 const BTN_META = [
   { idx:0,  label:'A / Cross',       defaultAction:'Cursor Click'    },
@@ -1251,12 +1249,23 @@ function execAction(action, gp) {
 }
 
 function scrollActive(dx, dy) {
-  if (S.vrMode) {
-    try { document.getElementById('fl').contentWindow?.scrollBy(dx,dy); } catch{}
-    try { document.getElementById('fr').contentWindow?.scrollBy(dx,dy); } catch{}
-  } else {
-    try { document.getElementById('sf').contentWindow?.scrollBy(dx,dy); } catch{}
-  }
+  const targets = S.vrMode
+    ? [document.getElementById('fl'), document.getElementById('fr')]
+    : [document.getElementById('sf')];
+
+  targets.forEach(f => {
+    if (!f) return;
+
+    try {
+      f.contentWindow.postMessage({
+        type: 'VOID_SCROLL',
+        dx,
+        dy
+      }, '*');
+    } catch(e) {
+      console.error('Scroll failed:', e);
+    }
+  });
 }
 
 function updateCtrlUI() {
