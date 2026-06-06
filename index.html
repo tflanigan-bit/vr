@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>TNAP 2.0</title>
+<title>VOID VR</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
 :root {
@@ -22,7 +22,7 @@ html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);f
 body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,225,.012) 2px,rgba(0,255,225,.012) 4px);pointer-events:none;z-index:9999;}
 
 /* ══ HEADER ══ */
-#hdr{display:flex;align-items:center;justify-content:space-between;padding:.55rem 1rem;border-bottom:1px solid var(--border);background:rgba(0,0,0,.6);height:48px;flex-shrink:0;position:relative;z-index:100;}
+#hdr{display:flex;align-items:center;justify-content:space-between;padding:.55rem 1rem;border-bottom:1px solid var(--border);background:rgba(0,0,0,.6);height:48px;flex-shrink:0;position:relative;z-index:300;}
 .logo{font-size:1.4rem;font-weight:700;letter-spacing:.12em;color:var(--neon);text-shadow:0 0 16px rgba(0,255,225,.4);}
 .logo span{color:var(--neon2);}
 .hdr-right{display:flex;align-items:center;gap:10px;}
@@ -50,12 +50,12 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .pnl-title::after{content:'';flex:1;height:1px;background:var(--border);}
 
 /* inputs */
-input[type=text],input[type=url]{width:100%;background:rgba(0,255,225,.05);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.75rem;padding:7px 9px;border-radius:4px;outline:none;transition:border .15s,box-shadow .15s;}
+input[type=text],input[type=url]{width:100%;background:rgba(0,255,225,.05);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.75rem;padding:7px 9px;border-radius:4px;outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:6px;}
 input[type=text]:focus,input[type=url]:focus{border-color:var(--neon);box-shadow:0 0 10px rgba(0,255,225,.18);}
 .row{display:flex;gap:6px;margin-bottom:6px;}
 .row input{margin:0;}
 
-.btn{background:transparent;border:1px solid var(--neon);color:var(--neon);font-family:'Rajdhani',sans-serif;font-size:.8rem;font-weight:600;padding:7px 11px;border-radius:4px;cursor:pointer;letter-spacing:.05em;transition:all .2s;touch-action:manipulation;}
+.btn{background:transparent;border:1px solid var(--neon);color:var(--neon);font-family:'Rajdhani',sans-serif;font-size:.8rem;font-weight:600;padding:7px 11px;border-radius:4px;cursor:pointer;letter-spacing:.04em;transition:all .2s;white-space:nowrap;}
 .btn:hover,.btn:active{background:rgba(0,255,225,.1);box-shadow:0 0 12px rgba(0,255,225,.28);}
 .btn.pink{border-color:var(--neon2);color:var(--neon2);}
 .btn.pink:hover,.btn.pink:active{background:rgba(255,0,170,.1);}
@@ -63,7 +63,7 @@ input[type=text]:focus,input[type=url]:focus{border-color:var(--neon);box-shadow
 .btn.glowing{background:rgba(0,255,225,.13);box-shadow:0 0 18px rgba(0,255,225,.32);animation:blip 1.4s infinite;}
 
 /* proxy badges */
-.pbadge{display:flex;align-items:center;gap:5px;font-family:'Share Tech Mono',monospace;font-size:.62rem;padding:3px 7px;border-radius:3px;border:1px solid var(--border);color:var(--dim);margin-bottom:6px;}
+.pbadge{display:flex;align-items:center;gap:5px;font-family:'Share Tech Mono',monospace;font-size:.62rem;padding:3px 7px;border-radius:3px;border:1px solid var(--border);color:var(--dim);margin-bottom:4px;transition:all .3s;}
 .pbadge .dot{margin:0;width:5px;height:5px;}
 .pbadge.active{border-color:var(--success);color:var(--success);}
 .pbadge.testing{border-color:var(--warn);color:var(--warn);}
@@ -71,7 +71,7 @@ input[type=text]:focus,input[type=url]:focus{border-color:var(--neon);box-shadow
 
 /* presets */
 .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
-.preset{background:var(--panel);border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:.64rem;padding:5px 8px;border-radius:4px;cursor:pointer;text-align:left;transition:all .2s;}
+.preset{background:var(--panel);border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:.64rem;padding:5px 8px;border-radius:4px;cursor:pointer;text-align:left;transition:all .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .preset:hover,.preset:active{background:rgba(0,255,225,.07);border-color:rgba(0,255,225,.4);color:var(--neon);}
 
 /* sliders */
@@ -133,7 +133,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 /* HUD */
 #hud{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none;}
 #mv:hover #hud,#mv:focus-within #hud{opacity:1;pointer-events:all;}
-.hbtn{background:rgba(0,0,0,.8);border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.7rem;padding:5px 10px;border-radius:4px;cursor:pointer;background:rgba(0,0,0,.8);transition:all .2s;}
+.hbtn{background:rgba(0,0,0,.8);border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.7rem;padding:5px 10px;border-radius:4px;cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;}
 .hbtn:hover,.hbtn:active{border-color:var(--neon);color:var(--neon);}
 
 /* mobile HUD always visible */
@@ -149,7 +149,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 .xh-v{height:20px;width:1px;top:50%;left:50%;transform:translate(-50%,-50%);}
 
 /* gyro bar */
-#gyrobar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);border:1px solid var(--border);border-radius:4px;padding:6px 12px;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--dim);display:none;gap:12px;z-index:45;}
+#gyrobar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);border:1px solid var(--border);border-radius:4px;padding:6px 12px;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--neon);z-index:60;display:none;gap:12px;}
 #gyrobar.on{display:flex;}
 
 /* loading */
@@ -160,7 +160,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 .load-txt{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--neon);letter-spacing:.08em;}
 
 /* notif */
-#notif{position:fixed;bottom:16px;right:16px;background:rgba(0,0,0,.9);border:1px solid var(--neon);color:var(--neon);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:8px 14px;border-radius:4px;transform:translateY(150%);opacity:0;transition:all .3s;z-index:9000;}
+#notif{position:fixed;bottom:16px;right:16px;background:rgba(0,0,0,.9);border:1px solid var(--neon);color:var(--neon);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:8px 14px;border-radius:4px;z-index:10000;transform:translateY(60px);opacity:0;transition:all .3s;max-width:300px;line-height:1.4;}
 #notif.on{transform:translateY(0);opacity:1;}
 #notif.err{border-color:var(--fail);color:var(--fail);}
 #notif.warn{border-color:var(--warn);color:var(--warn);}
@@ -219,8 +219,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   display: none;
   transform: translate(-50%, -50%);
   transition: opacity .15s;
-  left: -100px;
-  top: -100px;
 }
 #vcursor.on { display: block; }
 #vcursor svg { width: 100%; height: 100%; filter: drop-shadow(0 0 4px rgba(0,255,225,.8)); }
@@ -233,8 +231,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   z-index: 9000;
   display: none;
   transform: translate(-50%, -50%);
-  left: -100px;
-  top: -100px;
 }
 #vcursor-r.on { display: block; }
 #vcursor-r svg { width: 100%; height: 100%; filter: drop-shadow(0 0 4px rgba(255,0,170,.8)); }
@@ -272,6 +268,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   border-radius: 3px;
   margin-left: 2px;
 }
+
+/* Hide real OS cursor inside mv when cursor mode active */
+#mv.cursor-mode-on { cursor: none; }
 </style>
 </head>
 <body>
@@ -398,7 +397,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         <span class="vdisp" id="ss-v">10</span>
       </div>
     </div>
-    <div id="cursor-info" style="display:none;font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--dim);margin-bottom:8px;line-height:1.6;background:rgba(0,255,225,.04);border:1px solid rgba(0,255,225,.1);padding:6px;border-radius:3px;">
+    <div id="cursor-info" style="display:none;font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--dim);margin-bottom:8px;line-height:1.6;background:rgba(0,255,225,.04);border:1px solid var(--border);border-radius:4px;padding:6px 8px">
       <b style="color:var(--neon)">L-STICK</b> = scroll page<br>
       <b style="color:var(--neon)">R-STICK</b> = move cursor<br>
       <b style="color:var(--neon)">A</b> = click / follow link<br>
@@ -525,9 +524,9 @@ const S = {
   gyro: false,
   ipd: 63, zoom: 100, barrel: 0,
   controllers: {},
-  mappings: {},
+  mappings: {},   // key: "gpIdx_btnIdx" → action string
   pollId: null,
-  cfWorker: localStorage.getItem('cf_worker') || 'https://pohh.tflanigan.workers.dev',
+  cfWorker: localStorage.getItem('cf_worker') || 'https://pohh.tflanigan.workers.dev', // also used by PROXIES[cf]
   menuOpen: false,
   cursorMode: false,
   cursorSpeed: 8,
@@ -536,6 +535,8 @@ const S = {
 
 // ══════════════════════════════════════════════════════
 // PROXY LAYER DEFINITIONS + KILL SWITCHES
+// Each proxy wraps the URL produced by the previous one.
+// Toggle any layer on/off independently. State persists.
 // ══════════════════════════════════════════════════════
 
 const loadEn = (id, def) => localStorage.getItem('px_'+id) !== null ? localStorage.getItem('px_'+id)==='1' : def;
@@ -608,12 +609,14 @@ const PROXIES = [
   },
 ];
 
+// Chain all enabled proxies left→right
 function buildProxyUrl(rawUrl) {
   let url = rawUrl;
   for (const p of PROXIES) { if (p.enabled) url = p.wrap(url); }
   return url;
 }
 
+// ── Proxy list UI ─────────────────────────────────────
 function renderProxyList() {
   const el = document.getElementById('proxy-list');
   el.innerHTML = '';
@@ -668,7 +671,9 @@ function setCF() {
   renderProxyList();
   notify('CF Worker set: '+v);
 }
-
+// ══════════════════════════════════════════════════════
+// PRESETS
+// ══════════════════════════════════════════════════════
 const PRESETS = [
   { label:'YouTube',    url:'https://www.youtube.com' },
   { label:'Steam',      url:'https://store.steampowered.com' },
@@ -692,6 +697,9 @@ function buildPresets() {
   });
 }
 
+// ══════════════════════════════════════════════════════
+// LOAD
+// ══════════════════════════════════════════════════════
 function loadSite() {
   let url = document.getElementById('url-in').value.trim();
   if (!url) return;
@@ -707,6 +715,7 @@ function loadSite() {
   document.getElementById('ph').style.display = 'none';
   closeMobileMenu();
 
+  // Small delay so loading shows, then inject
   setTimeout(() => {
     hideLoading();
     dot('d-site', 'ok');
@@ -732,6 +741,9 @@ function openExternal() {
   if (url) window.open(url, '_blank');
 }
 
+// ══════════════════════════════════════════════════════
+// FRAME RENDERING — FIXED SBS
+// ══════════════════════════════════════════════════════
 function renderFrames() {
   if (S.vrMode) {
     document.getElementById('sf').style.display = 'none';
@@ -751,20 +763,24 @@ function setSBSFrames() {
   const fl   = document.getElementById('fl');
   const fr   = document.getElementById('fr');
 
+  // Measure available space AFTER layout
   requestAnimationFrame(() => {
     const portrait = S.portrait;
     const divSize  = 6;
 
     let eyeW, eyeH;
     if (portrait) {
+      // Vertical split: each eye gets full width, half height
       eyeW = wrap.clientWidth;
       eyeH = (wrap.clientHeight - divSize) / 2;
     } else {
+      // Horizontal split: each eye gets half width, full height
       eyeW = (wrap.clientWidth - divSize) / 2;
       eyeH = wrap.clientHeight;
     }
 
     const scale = S.zoom / 100;
+    // iframe is rendered at full page width/height then scaled down
     const iframeW = eyeW / scale;
     const iframeH = eyeH / scale;
     const ipdOff  = (S.ipd - 63) * 0.4;
@@ -774,11 +790,13 @@ function setSBSFrames() {
       f.style.height = iframeH + 'px';
       f.style.transform = `scale(${scale})`;
       f.style.transformOrigin = 'top left';
+      // IPD horizontal offset: left eye shifts right, right eye shifts left
       const off = i === 0 ? ipdOff : -ipdOff;
       f.style.left = off + 'px';
       f.style.top  = '0px';
     });
 
+    // Only set src if not already loaded
     if (!fl.src || fl.src === 'about:blank') fl.src = S.proxyUrl;
     if (!fr.src || fr.src === 'about:blank') fr.src = S.proxyUrl;
 
@@ -786,8 +804,12 @@ function setSBSFrames() {
   });
 }
 
+// Recalculate on resize
 window.addEventListener('resize', () => { if (S.vrMode) setSBSFrames(); });
 
+// ══════════════════════════════════════════════════════
+// VR CONTROLS
+// ══════════════════════════════════════════════════════
 function toggleVR() {
   S.vrMode = document.getElementById('tog-vr').checked;
   const btn = document.getElementById('vr-btn');
@@ -869,6 +891,9 @@ function toggleXH() {
   document.getElementById('xh').classList.toggle('on', S.xhair);
 }
 
+// ══════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════
 function getFrame() { return S.vrMode ? document.getElementById('fl') : document.getElementById('sf'); }
 function navBack()  { try { getFrame().contentWindow.history.back();    } catch{} }
 function navFwd()   { try { getFrame().contentWindow.history.forward(); } catch{} }
@@ -878,6 +903,9 @@ function requestFS() {
   document.fullscreenElement ? document.exitFullscreen() : (el.requestFullscreen?.() || el.webkitRequestFullscreen?.());
 }
 
+// ══════════════════════════════════════════════════════
+// GYRO
+// ══════════════════════════════════════════════════════
 function toggleGyro() {
   S.gyro = document.getElementById('tog-gyro').checked;
   if (S.gyro) {
@@ -894,276 +922,554 @@ function stopGyro()  { window.removeEventListener('deviceorientation', onGyro); 
 function onGyro(e)   { document.getElementById('ga').textContent=Math.round(e.alpha||0)+'°'; document.getElementById('gb').textContent=Math.round(e.beta||0)+'°'; document.getElementById('gc').textContent=Math.round(e.gamma||0)+'°'; }
 
 // ══════════════════════════════════════════════════════
-// GAMEPAD POLLING — BUTTON A & L-STICK HANDLING
+// GAMEPAD — AUTO-MAPPING
 // ══════════════════════════════════════════════════════
-const PAD_DEADZONE = 0.25;
-const PAD_STATE = {};
-
-function startGamepadPoll() {
-  if (S.pollId) return;
-  S.pollId = setInterval(pollGamepad, 50);
-  window.addEventListener('gamepadconnected', onGamepadConnected);
-  window.addEventListener('gamepaddisconnected', onGamepadDisconnected);
-}
-
-function stopGamepadPoll() {
-  if (S.pollId) clearInterval(S.pollId);
-  S.pollId = null;
-  window.removeEventListener('gamepadconnected', onGamepadConnected);
-  window.removeEventListener('gamepaddisconnected', onGamepadDisconnected);
-}
-
-function onGamepadConnected(e) {
-  dot('d-ctrl', 'ok');
-  notify('🎮 Controller connected');
-  renderControllerUI(e.gamepad.index);
-}
-
-function onGamepadDisconnected(e) {
-  dot('d-ctrl', 'err');
-  document.getElementById('ctrl-area').innerHTML = '<div id="noctrl"><div style="font-size:1.6rem;opacity:.22;margin-bottom:5px">🎮</div><div>No controller detected</div></div>';
-  document.getElementById('map-area').innerHTML = '<div style="font-family:"Share Tech Mono",monospace;font-size:.65rem;color:var(--dim);text-align:center;padding:6px 0">Connect a controller first</div>';
-  notify('🎮 Controller disconnected');
-}
-
-function pollGamepad() {
-  const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-  let foundActive = false;
-
-  for (let i = 0; i < gamepads.length; i++) {
-    const gp = gamepads[i];
-    if (!gp) continue;
-
-    foundActive = true;
-    detectGameMode(gp);
-
-    if (!S.cursorMode) continue;
-
-    // Initialize state for this gamepad if needed
-    if (!PAD_STATE[i]) PAD_STATE[i] = { aPressed: false, lsx: 0, lsy: 0, rsx: 0, rsy: 0 };
-    const state = PAD_STATE[i];
-
-    // ── BUTTON A (button 0) ──
-    if (gp.buttons[0]) {
-      const pressed = gp.buttons[0].pressed;
-      if (pressed && !state.aPressed) {
-        // Button pressed transition
-        doClick();
-        document.getElementById('vcursor').classList.add('click');
-        document.getElementById('vcursor-r').classList.add('click');
-        setTimeout(() => {
-          document.getElementById('vcursor').classList.remove('click');
-          document.getElementById('vcursor-r').classList.remove('click');
-        }, 180);
-      }
-      state.aPressed = pressed;
-    }
-
-    // ── L-STICK (axes 0, 1) ──
-    const lsx = gp.axes[0] || 0;
-    const lsy = gp.axes[1] || 0;
-    
-    if (Math.abs(lsx) > PAD_DEADZONE || Math.abs(lsy) > PAD_DEADZONE) {
-      // Scroll on Y axis (lsy > 0 = down, scroll down)
-      if (Math.abs(lsy) > Math.abs(lsx)) {
-        const scrollDir = lsy > 0 ? 1 : -1;
-        const scrollAmount = Math.abs(lsy) * S.scrollSpeed;
-        doScroll(scrollAmount * scrollDir);
-      }
-    }
-
-    // ── R-STICK (axes 2, 3) ──
-    const rsx = gp.axes[2] || 0;
-    const rsy = gp.axes[3] || 0;
-    
-    if (Math.abs(rsx) > PAD_DEADZONE || Math.abs(rsy) > PAD_DEADZONE) {
-      // Move cursor
-      CUR.x += rsx * 0.05 * (S.cursorSpeed / 8);
-      CUR.y += rsy * 0.05 * (S.cursorSpeed / 8);
-      CUR.x = Math.max(0, Math.min(1, CUR.x));
-      CUR.y = Math.max(0, Math.min(1, CUR.y));
-      updateCursorPosition();
-    }
-
-    // ── R3 BUTTON (button 11) — toggle game mode ──
-    if (gp.buttons[11] && gp.buttons[11].pressed && !state.r3Pressed) {
-      setGameMode(!CUR.gameMode, 'R3 toggled');
-      state.r3Pressed = true;
-    } else if (!gp.buttons[11]?.pressed) {
-      state.r3Pressed = false;
-    }
-  }
-
-  if (foundActive && !S.cursorMode) {
-    dot('d-ctrl', 'ok');
-  }
-}
-
-function doClick() {
-  const f = getFrame();
-  if (!f || !f.contentWindow) return;
-  
-  try {
-    const x = CUR.x * f.clientWidth;
-    const y = CUR.y * f.clientHeight;
-    
-    // Dispatch custom event to iframe window
-    const event = new CustomEvent('VOID_CURSOR_CLICK', {
-      detail: { x, y }
-    });
-    f.contentWindow.dispatchEvent(event);
-    notify('✓ Clicked');
-  } catch (e) {
-    console.error('Click error:', e);
-  }
-}
-
-function doScroll(amount) {
-  const f = getFrame();
-  if (!f || !f.contentWindow) return;
-  
-  try {
-    // Dispatch custom event to iframe window
-    const event = new CustomEvent('VOID_SCROLL', {
-      detail: { amount }
-    });
-    f.contentWindow.dispatchEvent(event);
-  } catch (e) {
-    console.error('Scroll error:', e);
-  }
-}
-
-function updateCursorPosition() {
-  const f = getFrame();
-  if (!f) return;
-
-  const x = CUR.x * f.clientWidth;
-  const y = CUR.y * f.clientHeight;
-
-  const cur = document.getElementById('vcursor');
-  if (S.vrMode) {
-    // Left eye
-    cur.style.left = x + 'px';
-    cur.style.top = y + 'px';
-
-    // Right eye
-    const curR = document.getElementById('vcursor-r');
-    curR.style.left = x + 'px';
-    curR.style.top = y + 'px';
-  } else {
-    cur.style.left = x + 'px';
-    cur.style.top = y + 'px';
-  }
-}
-
-function renderControllerUI(gpIdx) {
-  const gp = navigator.getGamepads()[gpIdx];
-  if (!gp) return;
-
-  const ctrl = document.getElementById('ctrl-area');
-  ctrl.innerHTML = `<div class="ctrl-box"><div class="ctrl-name">GP${gpIdx}: ${gp.id}</div><div class="ctrl-btns">` +
-    gp.buttons.map((b, i) => `<button class="cbtn" id="btn-${i}">${i}</button>`).join('') +
-    `</div><div class="axes-row">Axes: ${gp.axes.map(a => a.toFixed(2)).join(' / ')}</div></div>`;
-}
 
 // ══════════════════════════════════════════════════════
 // VIRTUAL CURSOR STATE
 // ══════════════════════════════════════════════════════
 const CUR = {
-  x: 0.5, y: 0.5,
+  x: 0.5, y: 0.5,        // normalised 0-1 within active eye
   gameMode: false,
   modeAutoDetected: false,
 };
 
+// ── Shared cursor position writer ──────────────────────
+function updateCursorPos() {
+  const mv   = document.getElementById('mv');
+  const mvR  = mv.getBoundingClientRect();
+  const cur  = document.getElementById('vcursor');
+  const curR = document.getElementById('vcursor-r');
+
+  if (S.vrMode) {
+    const wrap = document.getElementById('vr-wrap');
+    const div  = 6;
+    let eyeW, eyeH, r_ox, r_oy;
+    if (S.portrait) {
+      eyeW = wrap.clientWidth;
+      eyeH = (wrap.clientHeight - div) / 2;
+      r_ox = 0; r_oy = eyeH + div;
+    } else {
+      eyeW = (wrap.clientWidth - div) / 2;
+      eyeH = wrap.clientHeight;
+      r_ox = eyeW + div; r_oy = 0;
+    }
+    cur.style.left  = (CUR.x * eyeW) + 'px';
+    cur.style.top   = (CUR.y * eyeH) + 'px';
+    curR.style.left = (r_ox + CUR.x * eyeW) + 'px';
+    curR.style.top  = (r_oy + CUR.y * eyeH) + 'px';
+  } else {
+    const sf   = document.getElementById('sf');
+    const sfR  = sf.getBoundingClientRect();
+    cur.style.left = (sfR.left - mvR.left + CUR.x * sfR.width)  + 'px';
+    cur.style.top  = (sfR.top  - mvR.top  + CUR.y * sfR.height) + 'px';
+  }
+}
+
+// ── The actual click firer ───────────────────────────────────────
+// Strategy:
+//  1. Same-origin (translate.goog rewrite): elementFromPoint + real MouseEvents
+//  2. Cross-origin fallback: synthesise a pointer event at the iframe's
+//     screen coordinates so the browser dispatches it natively into the frame
+function fireCursorClick(frameEl) {
+  if (!frameEl) return;
+
+  const rect  = frameEl.getBoundingClientRect();
+  const scale = S.zoom / 100;
+
+  // Where in the scaled iframe viewport the cursor sits (CSS pixels)
+  const vpX = CUR.x * rect.width;
+  const vpY = CUR.y * rect.height;
+
+  // Equivalent point inside the iframe's own document (unscaled)
+  const docX = vpX / scale;
+  const docY = vpY / scale;
+
+  // Absolute screen coords for native event injection
+  const screenX = rect.left + vpX;
+  const screenY = rect.top  + vpY;
+
+  // ── 1. Same-origin attempt ──────────────────────────────────
+  let sameOriginOk = false;
+  try {
+    const doc = frameEl.contentWindow?.document;
+    if (doc) {
+      const el = doc.elementFromPoint(docX, docY);
+      if (el) {
+        const evOpts = {
+          bubbles: true, cancelable: true,
+          view: frameEl.contentWindow,
+          clientX: docX, clientY: docY,
+          screenX, screenY,
+        };
+        el.dispatchEvent(new PointerEvent('pointerover',  evOpts));
+        el.dispatchEvent(new PointerEvent('pointerenter', {...evOpts, bubbles:false}));
+        el.dispatchEvent(new MouseEvent('mouseover',      evOpts));
+        el.dispatchEvent(new PointerEvent('pointerdown',  evOpts));
+        el.dispatchEvent(new MouseEvent('mousedown',      evOpts));
+        el.dispatchEvent(new PointerEvent('pointerup',    evOpts));
+        el.dispatchEvent(new MouseEvent('mouseup',        evOpts));
+        el.dispatchEvent(new MouseEvent('click',          evOpts));
+
+        // If it's inside or IS a link, follow it
+        const link = el.closest?.('a[href]') || (el.tagName==='A' ? el : null);
+        if (link?.href) {
+          try { link.click(); } catch {}
+        }
+
+        // If it's a button/input, focus it too
+        if (['BUTTON','INPUT','SELECT','TEXTAREA'].includes(el.tagName)) {
+          try { el.focus(); } catch {}
+        }
+
+        sameOriginOk = true;
+      }
+    }
+  } catch (_) { /* cross-origin — fall through */ }
+
+  // ── 2. Cross-origin: inject native pointer at screen coords ──
+  // We briefly make the iframe pointer-events:none, find the element
+  // in the PARENT that sits at those coords, restore, then re-dispatch
+  // at the true screen position. The browser routes it into the iframe.
+  if (!sameOriginOk) {
+    try {
+      // Temporarily disable iframe pointer capture so elementFromPoint
+      // in the parent can see *through* it (won't work — iframe is opaque,
+      // but we can still fire at the iframe's coords via the iframe element itself).
+      const evOpts = {
+        bubbles: true, cancelable: true,
+        clientX: screenX, clientY: screenY,
+        screenX, screenY,
+      };
+      // Fire on the iframe element itself — browser routes into frame
+      frameEl.dispatchEvent(new PointerEvent('pointerdown', evOpts));
+      frameEl.dispatchEvent(new MouseEvent ('mousedown',    evOpts));
+      frameEl.dispatchEvent(new PointerEvent('pointerup',   evOpts));
+      frameEl.dispatchEvent(new MouseEvent ('mouseup',      evOpts));
+      frameEl.dispatchEvent(new MouseEvent ('click',        evOpts));
+    } catch (_) {}
+  }
+
+  // ── Flash cursor ────────────────────────────────────────────
+  ['vcursor','vcursor-r'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('click');
+    setTimeout(() => el.classList.remove('click'), 200);
+  });
+}
+
+function doClick() {
+  if (S.vrMode) {
+    fireCursorClick(document.getElementById('fl'));
+    // Small delay so both eyes don't double-navigate
+    setTimeout(() => fireCursorClick(document.getElementById('fr')), 30);
+  } else {
+    fireCursorClick(document.getElementById('sf'));
+  }
+  // Also update cursor flash immediately
+  document.getElementById('vcursor').classList.add('click');
+  setTimeout(() => document.getElementById('vcursor').classList.remove('click'), 200);
+}
+
+// ── Scroll both frames or single ──────────────────────
+function scrollActive(dx, dy) {
+  if (S.vrMode) {
+    try { document.getElementById('fl').contentWindow?.scrollBy(dx, dy); } catch {}
+    try { document.getElementById('fr').contentWindow?.scrollBy(dx, dy); } catch {}
+  } else {
+    try { document.getElementById('sf').contentWindow?.scrollBy(dx, dy); } catch {}
+  }
+}
+
+// ── DESKTOP mouse tracking — real cursor inside #mv ──
+function initMouseTracking() {
+  const mv = document.getElementById('mv');
+
+  mv.addEventListener('mousemove', e => {
+    if (!S.cursorMode || CUR.gameMode) return;
+    const r = mv.getBoundingClientRect();
+    if (S.vrMode) {
+      const wrap = document.getElementById('vr-wrap');
+      const div  = 6;
+      const eyeW = S.portrait ? wrap.clientWidth : (wrap.clientWidth - div) / 2;
+      const eyeH = S.portrait ? (wrap.clientHeight - div) / 2 : wrap.clientHeight;
+      // Use left-eye quadrant for normalisation
+      const relX = e.clientX - r.left;
+      const relY = e.clientY - r.top;
+      CUR.x = Math.max(0, Math.min(1, relX / eyeW));
+      CUR.y = Math.max(0, Math.min(1, relY / eyeH));
+    } else {
+      CUR.x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      CUR.y = Math.max(0, Math.min(1, (e.clientY - r.top)  / r.height));
+    }
+    updateCursorPos();
+  });
+
+  // Desktop click inside mv
+  mv.addEventListener('click', e => {
+    if (!S.cursorMode || CUR.gameMode) return;
+    // Cursor position already updated by mousemove above
+    doClick();
+  });
+
+  // ── MOBILE touch-as-mouse ────────────────────────────
+  mv.addEventListener('touchmove', e => {
+    if (!S.cursorMode || CUR.gameMode) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    const r = mv.getBoundingClientRect();
+    if (S.vrMode) {
+      const wrap = document.getElementById('vr-wrap');
+      const eyeW = S.portrait ? wrap.clientWidth : (wrap.clientWidth - 6) / 2;
+      const eyeH = S.portrait ? (wrap.clientHeight - 6) / 2 : wrap.clientHeight;
+      CUR.x = Math.max(0, Math.min(1, (t.clientX - r.left) / eyeW));
+      CUR.y = Math.max(0, Math.min(1, (t.clientY - r.top)  / eyeH));
+    } else {
+      CUR.x = Math.max(0, Math.min(1, (t.clientX - r.left) / r.width));
+      CUR.y = Math.max(0, Math.min(1, (t.clientY - r.top)  / r.height));
+    }
+    updateCursorPos();
+  }, { passive: false });
+
+  mv.addEventListener('touchend', e => {
+    if (!S.cursorMode || CUR.gameMode) return;
+    e.preventDefault();
+    doClick();
+  }, { passive: false });
+}
+
+// ══════════════════════════════════════════════════════
+// TOGGLE CURSOR MODE
+// ══════════════════════════════════════════════════════
 function toggleCursorMode() {
   S.cursorMode = document.getElementById('tog-cursor').checked;
-  document.getElementById('cursor-speed-row').style.display = S.cursorMode ? '' : 'none';
+  document.getElementById('cursor-speed-row').style.display  = S.cursorMode ? '' : 'none';
   document.getElementById('cursor-scroll-row').style.display = S.cursorMode ? '' : 'none';
-  document.getElementById('cursor-info').style.display = S.cursorMode ? '' : 'none';
+  document.getElementById('cursor-info').style.display       = S.cursorMode ? '' : 'none';
+  const cur  = document.getElementById('vcursor');
+  const curR = document.getElementById('vcursor-r');
   if (S.cursorMode) {
-    document.getElementById('vcursor').classList.add('on');
-    document.getElementById('vcursor-r').classList.add('on');
-    startGamepadPoll();
-    notify('Cursor mode ON');
+    cur.classList.add('on');
+    if (S.vrMode) curR.classList.add('on');
+    document.getElementById('mv').classList.add('cursor-mode-on');
+    notify('🖱️ Cursor ON — mouse/touch moves cursor, click to interact');
   } else {
-    document.getElementById('vcursor').classList.remove('on');
-    document.getElementById('vcursor-r').classList.remove('on');
-    stopGamepadPoll();
+    cur.classList.remove('on');
+    curR.classList.remove('on');
+    document.getElementById('mv').classList.remove('cursor-mode-on');
     notify('Cursor mode OFF');
   }
 }
 
-function detectGameMode(gp) {
-  // If a bumper (button 4 or 5) is pressed, enable game mode
-  const bumper = (gp.buttons[4]?.pressed || gp.buttons[5]?.pressed);
-  if (bumper && !CUR.modeAutoDetected) {
-    setGameMode(true, 'Auto-detected from bumper press');
-    CUR.modeAutoDetected = true;
-  } else if (!bumper && CUR.modeAutoDetected && CUR.gameMode) {
-    setGameMode(false, 'Released from game mode');
-    CUR.modeAutoDetected = false;
-  }
-}
-
-function setGameMode(enabled, reason) {
-  CUR.gameMode = enabled;
+// ══════════════════════════════════════════════════════
+// GAME MODE
+// ══════════════════════════════════════════════════════
+function setGameMode(on, reason) {
+  CUR.gameMode = on;
   const ind = document.getElementById('game-indicator');
-  if (enabled) {
+  if (on) {
+    ind.textContent = '🎮 GAME MODE — ' + (reason || 'BROWSE OFF');
     ind.classList.add('on');
-    notify('🎮 Game mode ON (no cursor)', 'warn');
+    document.getElementById('vcursor').classList.remove('on');
+    document.getElementById('vcursor-r').classList.remove('on');
+    notify('🎮 Game Mode ON — R3 to exit', 'warn');
   } else {
     ind.classList.remove('on');
-    notify('🎮 Browse mode ON (cursor visible)');
+    if (S.cursorMode) {
+      document.getElementById('vcursor').classList.add('on');
+      if (S.vrMode) document.getElementById('vcursor-r').classList.add('on');
+    }
+    notify('🌐 Browse Mode ON');
   }
 }
 
+function detectGameMode(gp) {
+  if (!S.cursorMode) return;
+  try {
+    const f = getFrame();
+    if (!f) return;
+    const doc = f.contentWindow?.document;
+    if (!doc) return;
+    let hasFullCanvas = false;
+    doc.querySelectorAll('canvas').forEach(c => {
+      const r = c.getBoundingClientRect();
+      if (r.width > f.clientWidth * 0.7 && r.height > f.clientHeight * 0.7) hasFullCanvas = true;
+    });
+    const pointerLocked = !!doc.pointerLockElement;
+    const title = (doc.title || '').toLowerCase();
+    const gameKw = ['game','play','level','score','fps','pvp','rpg','mmo','minecraft','roblox','fortnite'];
+    const isGame = pointerLocked || hasFullCanvas || gameKw.some(k => title.includes(k));
+    if (isGame && !CUR.gameMode) { CUR.modeAutoDetected = true; setGameMode(true, 'AUTO-DETECTED'); }
+    else if (!isGame && CUR.gameMode && CUR.modeAutoDetected) { CUR.modeAutoDetected = false; setGameMode(false); }
+  } catch {}
+}
+
 // ══════════════════════════════════════════════════════
-// HELPERS
+// GAMEPAD
 // ══════════════════════════════════════════════════════
-let _nt;
-function notify(msg, type) {
-  const el = document.getElementById('notif');
-  el.textContent = msg;
-  el.className = 'on' + (type === 'err' ? ' err' : type === 'warn' ? ' warn' : '');
-  clearTimeout(_nt);
-  _nt = setTimeout(() => el.classList.remove('on'), 3500);
+const BTN_META = [
+  { idx:0,  label:'A / Cross',       defaultAction:'Cursor Click'     },
+  { idx:1,  label:'B / Circle',      defaultAction:'Navigate Back'    },
+  { idx:2,  label:'X / Square',      defaultAction:'Toggle Crosshair' },
+  { idx:3,  label:'Y / Triangle',    defaultAction:'Toggle VR'        },
+  { idx:4,  label:'LB / L1',         defaultAction:'Scroll Up'        },
+  { idx:5,  label:'RB / R1',         defaultAction:'Scroll Down'      },
+  { idx:6,  label:'LT / L2',         defaultAction:'Zoom Out'         },
+  { idx:7,  label:'RT / R2',         defaultAction:'Zoom In'          },
+  { idx:8,  label:'Select / Share',  defaultAction:'None'             },
+  { idx:9,  label:'Start / Options', defaultAction:'Fullscreen'       },
+  { idx:10, label:'L3 (L-Stick)',    defaultAction:'None'             },
+  { idx:11, label:'R3 (R-Stick)',    defaultAction:'Toggle Game Mode' },
+  { idx:12, label:'D-Pad ↑',         defaultAction:'Scroll Up'        },
+  { idx:13, label:'D-Pad ↓',         defaultAction:'Scroll Down'      },
+  { idx:14, label:'D-Pad ←',         defaultAction:'Scroll Left'      },
+  { idx:15, label:'D-Pad →',         defaultAction:'Scroll Right'     },
+];
+
+const BTN_ACTIONS = [
+  'None','Scroll Up','Scroll Down','Scroll Left','Scroll Right',
+  'Zoom In','Zoom Out','Toggle VR','Navigate Back','Navigate Forward',
+  'Reload','Cursor Click','Click Center','Toggle Crosshair','Fullscreen',
+  'Toggle Game Mode','Toggle Cursor Mode',
+];
+
+function autoMapController(gpIndex, buttonCount) {
+  BTN_META.forEach(b => {
+    if (b.idx >= buttonCount) return;
+    const key = gpIndex + '_' + b.idx;
+    if (!S.mappings[key]) S.mappings[key] = b.defaultAction;
+  });
 }
 
-function dot(id, cls) {
-  const d = document.getElementById(id);
-  if (!d) return;
-  d.className = 'dot' + (cls ? ' '+cls : '');
+function setupGamepad() {
+  window.addEventListener('gamepadconnected', e => {
+    S.controllers[e.gamepad.index] = e.gamepad;
+    autoMapController(e.gamepad.index, e.gamepad.buttons.length);
+    updateCtrlUI();
+    dot('d-ctrl', 'ok');
+    notify('🎮 Auto-mapped: ' + e.gamepad.id.substring(0, 36));
+    if (!S.pollId) startPoll();
+  });
+  window.addEventListener('gamepaddisconnected', e => {
+    delete S.controllers[e.gamepad.index];
+    updateCtrlUI();
+    if (!Object.keys(S.controllers).length) { dot('d-ctrl', ''); stopPoll(); }
+    notify('Controller disconnected');
+  });
 }
 
-function showLoading(msg) {
-  document.getElementById('loading').classList.add('on');
-  document.getElementById('load-msg').textContent = msg || 'LOADING...';
+function startPoll() {
+  const prevBtns = {};
+  let gameDetectTick = 0;
+
+  function poll() {
+    const gps = navigator.getGamepads?.() || [];
+    for (let i = 0; i < gps.length; i++) {
+      const gp = gps[i]; if (!gp) continue;
+      S.controllers[i] = gp;
+      if (!prevBtns[i]) prevBtns[i] = new Array(gp.buttons.length).fill(false);
+
+      // Button presses
+      gp.buttons.forEach((btn, j) => {
+        if (btn.pressed && !prevBtns[i][j]) {
+          const action = S.mappings[i + '_' + j] || 'None';
+          if (CUR.gameMode && action !== 'Toggle Game Mode') {
+            // game mode: pass-through, don't intercept
+          } else if ((action === 'Cursor Click') && S.cursorMode) {
+            // A button cursor click — bypass execAction, call directly
+            doClick();
+            ['vcursor','vcursor-r'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) { el.classList.add('click'); setTimeout(()=>el.classList.remove('click'),200); }
+            });
+          } else {
+            execAction(action);
+          }
+        }
+        prevBtns[i][j] = btn.pressed;
+      });
+
+      if (!CUR.gameMode) {
+        const DZ = 0.12;
+        if (S.cursorMode) {
+          // R-stick → move cursor
+          const rx = gp.axes[2] || 0, ry = gp.axes[3] || 0;
+          if (Math.abs(rx) > DZ || Math.abs(ry) > DZ) {
+            const spd = (S.cursorSpeed || 8) / 800;
+            CUR.x = Math.max(0, Math.min(1, CUR.x + rx * spd * 16));
+            CUR.y = Math.max(0, Math.min(1, CUR.y + ry * spd * 16));
+            updateCursorPos();
+          }
+        }
+        // L-stick → scroll (always)
+        const lx = gp.axes[0] || 0, ly = gp.axes[1] || 0;
+        const SP = S.scrollSpeed || 10;
+        if (Math.abs(lx) > DZ || Math.abs(ly) > DZ) scrollActive(lx * SP, ly * SP);
+      }
+    }
+
+    // Game auto-detect every ~2s
+    if (++gameDetectTick > 120) {
+      gameDetectTick = 0;
+      detectGameMode((navigator.getGamepads?.() || [])[0]);
+    }
+
+    updateCtrlDisplay();
+    S.pollId = requestAnimationFrame(poll);
+  }
+  S.pollId = requestAnimationFrame(poll);
 }
 
-function hideLoading() {
-  document.getElementById('loading').classList.remove('on');
+function stopPoll() { if (S.pollId) { cancelAnimationFrame(S.pollId); S.pollId = null; } }
+
+function execAction(action) {
+  switch (action) {
+    case 'Scroll Up':          scrollActive(0, -200); break;
+    case 'Scroll Down':        scrollActive(0,  200); break;
+    case 'Scroll Left':        scrollActive(-200, 0); break;
+    case 'Scroll Right':       scrollActive( 200, 0); break;
+    case 'Zoom In':            document.getElementById('zoom').value = Math.min(200, S.zoom + 10); updateZoom(document.getElementById('zoom')); break;
+    case 'Zoom Out':           document.getElementById('zoom').value = Math.max(50,  S.zoom - 10); updateZoom(document.getElementById('zoom')); break;
+    case 'Toggle VR':          document.getElementById('tog-vr').click(); break;
+    case 'Navigate Back':      navBack(); break;
+    case 'Navigate Forward':   navFwd();  break;
+    case 'Reload':             doReload(); break;
+    case 'Toggle Crosshair':   document.getElementById('tog-xh').click(); break;
+    case 'Fullscreen':         requestFS(); break;
+    case 'Toggle Game Mode':   setGameMode(!CUR.gameMode, 'MANUAL'); CUR.modeAutoDetected = false; break;
+    case 'Toggle Cursor Mode': document.getElementById('tog-cursor').click(); break;
+    case 'Cursor Click':       doClick(); break;
+    case 'Click Center':
+      const f = getFrame();
+      if (f) try { f.contentWindow?.document?.elementFromPoint(f.clientWidth/2, f.clientHeight/2)?.click(); } catch {} break;
+  }
 }
 
-function toggleMenu(force) {
-  S.menuOpen = typeof force === 'boolean' ? force : !S.menuOpen;
+function updateCtrlUI() {
+  const ca = document.getElementById('ctrl-area');
+  const ma = document.getElementById('map-area');
+  const keys = Object.keys(S.controllers);
+  if (!keys.length) {
+    ca.innerHTML = `<div id="noctrl"><div style="font-size:1.6rem;opacity:.22;margin-bottom:5px">🎮</div><div>No controller detected</div><div style="margin-top:4px;font-size:.6rem;opacity:.5">Press any button on your gamepad</div></div>`;
+    ma.innerHTML = `<div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--dim);text-align:center;padding:6px 0">Connect a controller first</div>`;
+    return;
+  }
+  ca.innerHTML = ''; ma.innerHTML = '';
+  keys.forEach(idx => {
+    const gp = S.controllers[idx]; if (!gp) return;
+    const sid = gp.id.length > 30 ? gp.id.substring(0, 28) + '…' : gp.id;
+    const box = document.createElement('div');
+    box.className = 'ctrl-box';
+    box.innerHTML = `<div class="ctrl-name">#${gp.index} ${sid}</div><div class="ctrl-btns" id="cbg-${idx}"></div><div class="axes-row" id="cax-${idx}"></div>`;
+    ca.appendChild(box);
+    const mapDiv = document.createElement('div');
+    mapDiv.innerHTML = `<div style="font-size:.65rem;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:6px">Controller #${gp.index} — ${gp.buttons.length} buttons</div>`;
+    for (let i = 0; i < gp.buttons.length; i++) {
+      const key = idx + '_' + i;
+      if (!S.mappings[key]) S.mappings[key] = 'None';
+      const meta  = BTN_META.find(b => b.idx === i);
+      const label = meta ? meta.label : `Button ${i}`;
+      const row   = document.createElement('div');
+      row.className = 'mrow';
+      row.innerHTML = `<span class="mlabel" title="B${i}">${label}</span>
+        <select onchange="S.mappings['${key}']=this.value">
+          ${BTN_ACTIONS.map(a => `<option value="${a}"${S.mappings[key]===a?' selected':''}>${a}</option>`).join('')}
+        </select>`;
+      mapDiv.appendChild(row);
+    }
+    ma.appendChild(mapDiv);
+  });
+}
+
+let _lastDisp = 0;
+function updateCtrlDisplay() {
+  const now = Date.now(); if (now - _lastDisp < 80) return; _lastDisp = now;
+  const gps = navigator.getGamepads?.() || [];
+  for (let i = 0; i < gps.length; i++) {
+    const gp = gps[i]; if (!gp) continue;
+    const bg = document.getElementById('cbg-' + i);
+    const ax = document.getElementById('cax-' + i);
+    if (!bg || !ax) continue;
+    bg.innerHTML = '';
+    gp.buttons.forEach((b, j) => {
+      const d = document.createElement('span');
+      d.className = 'cbtn' + (b.pressed ? ' on' : '');
+      d.textContent = 'B' + j;
+      bg.appendChild(d);
+    });
+    const axParts = [];
+    for (let j = 0; j < gp.axes.length; j += 2)
+      axParts.push(`S${j/2|0}:(${(gp.axes[j]||0).toFixed(1)},${(gp.axes[j+1]||0).toFixed(1)})`);
+    ax.textContent = axParts.join('  ');
+  }
+}
+// ══════════════════════════════════════════════════════
+// MOBILE MENU
+// ══════════════════════════════════════════════════════
+function toggleMenu() {
+  S.menuOpen = !S.menuOpen;
   document.getElementById('sb').classList.toggle('open', S.menuOpen);
   document.getElementById('sb-overlay').classList.toggle('on', S.menuOpen);
+  document.getElementById('menu-toggle').textContent = S.menuOpen ? '✕' : '☰';
 }
-
 function closeMobileMenu() {
   S.menuOpen = false;
   document.getElementById('sb').classList.remove('open');
   document.getElementById('sb-overlay').classList.remove('on');
+  document.getElementById('menu-toggle').textContent = '☰';
 }
 
-// Init
-window.addEventListener('load', () => {
-  renderProxyList();
-  buildPresets();
-  startGamepadPoll();
+// ══════════════════════════════════════════════════════
+// LOADING / NOTIF / DOT
+// ══════════════════════════════════════════════════════
+function showLoading(m) { document.getElementById('loading').classList.add('on'); document.getElementById('load-msg').textContent=m||'LOADING...'; }
+function hideLoading()  { document.getElementById('loading').classList.remove('on'); }
+let _nt;
+function notify(msg, type) {
+  const el=document.getElementById('notif');
+  el.textContent=msg;
+  el.className='on'+(type?' '+type:'');
+  clearTimeout(_nt); _nt=setTimeout(()=>el.classList.remove('on'),3500);
+}
+function dot(id,cls) { const d=document.getElementById(id); if(d) d.className='dot'+(cls?' '+cls:''); }
+
+// ══════════════════════════════════════════════════════
+// KEYBOARD
+// ══════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+  if (e.key==='v'||e.key==='V') document.getElementById('tog-vr').click();
+  else if (e.key==='f'||e.key==='F') requestFS();
+  else if (e.key==='r'||e.key==='R') doReload();
+  else if (e.key==='c'||e.key==='C') document.getElementById('tog-xh').click();
+  else if (e.key==='m'||e.key==='M') toggleMenu();
+  else if (e.key==='ArrowUp')   try{getFrame().contentWindow.scrollBy(0,-120);}catch{}
+  else if (e.key==='ArrowDown') try{getFrame().contentWindow.scrollBy(0,120);}catch{}
+  else if (e.key==='Enter' && document.activeElement?.id==='url-in') loadSite();
+  else if (e.key==='Escape') { document.exitFullscreen?.(); closeMobileMenu(); }
 });
 
-window.addEventListener('beforeunload', stopGamepadPoll);
+// Sidebar closes via the dim overlay (see #sb-overlay onclick)
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+function init() {
+  buildPresets();
+  renderProxyList();
+  setupGamepad();
+  initMouseTracking();
+  document.getElementById('cf-in').value = S.cfWorker;
+  // Auto-detect portrait on mobile
+  if (window.innerWidth < window.innerHeight) {
+    document.getElementById('tog-portrait').checked = true;
+    togglePortrait();
+  }
+  notify('VOID VR ready — translate.goog + CF Worker routing 🔥');
+}
+
+init();
 </script>
 </body>
 </html>
