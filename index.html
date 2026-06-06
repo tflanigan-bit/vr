@@ -1171,15 +1171,14 @@ function startPoll() {
         const lx = gp.axes[0] || 0;
         const ly = gp.axes[1] || 0;
         const SP = S.scrollSpeed || 10;
-        if (Math.abs(lx) > DZ || Math.abs(ly) > DZ) {
-          // In VR mode scroll BOTH frames
-          if (S.vrMode) {
-            try { document.getElementById('fl').contentWindow?.scrollBy(lx*SP, ly*SP); } catch{}
-            try { document.getElementById('fr').contentWindow?.scrollBy(lx*SP, ly*SP); } catch{}
-          } else {
-            try { document.getElementById('sf').contentWindow?.scrollBy(lx*SP, ly*SP); } catch{}
-          }
-        }
+        function scrollActive(dx, dy) {
+  if (S.vrMode) {
+    try { document.getElementById('fl')?.contentWindow?.scrollBy(dx, dy); } catch {}
+    try { document.getElementById('fr')?.contentWindow?.scrollBy(dx, dy); } catch {}
+  } else {
+    try { document.getElementById('sf')?.contentWindow?.scrollBy(dx, dy); } catch {}
+  }
+}
       } else if (!CUR.gameMode && !S.cursorMode) {
         // Legacy scroll on L-stick when cursor mode off
         const lx = gp.axes[0]||0, ly = gp.axes[1]||0, DZ=0.15, SP=S.scrollSpeed||10;
