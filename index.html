@@ -2,567 +2,518 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>VOID VR — Proxy Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>VOID VR</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
 :root {
-  --neon:  #00ffe1;
-  --neon2: #ff00aa;
-  --neon3: #ffe100;
-  --dark:  #040a10;
-  --panel: rgba(0,255,225,0.04);
-  --border:rgba(0,255,225,0.18);
-  --text:  #c8fff8;
-  --dim:   rgba(200,255,248,0.45);
-  --success:#00ff88;
-  --warn:  #ffaa00;
-  --fail:  #ff4466;
+  --neon:#00ffe1; --neon2:#ff00aa; --neon3:#ffe100;
+  --dark:#040a10; --panel:rgba(0,255,225,0.05);
+  --border:rgba(0,255,225,0.18); --text:#c8fff8;
+  --dim:rgba(200,255,248,0.45);
+  --success:#00ff88; --warn:#ffaa00; --fail:#ff4466;
+  --sb:280px; /* sidebar width desktop */
 }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--dark);color:var(--text);font-family:'Rajdhani',sans-serif;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,225,.012) 2px,rgba(0,255,225,.012) 4px);pointer-events:none;z-index:9999;}
 
-*{margin:0;padding:0;box-sizing:border-box;}
+/* ══ HEADER ══ */
+#hdr{display:flex;align-items:center;justify-content:space-between;padding:.55rem 1rem;border-bottom:1px solid var(--border);background:rgba(0,0,0,.6);height:48px;flex-shrink:0;position:relative;z-index:300;}
+.logo{font-size:1.4rem;font-weight:700;letter-spacing:.12em;color:var(--neon);text-shadow:0 0 16px rgba(0,255,225,.4);}
+.logo span{color:var(--neon2);}
+.hdr-right{display:flex;align-items:center;gap:10px;}
+.status-bar{display:flex;gap:.9rem;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--dim);}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#222;margin-right:4px;vertical-align:middle;transition:all .3s;}
+.dot.ok{background:var(--success);box-shadow:0 0 7px var(--success);}
+.dot.warn{background:var(--warn);box-shadow:0 0 7px var(--warn);}
+.dot.err{background:var(--fail);box-shadow:0 0 7px var(--fail);}
+.dot.vr{background:var(--neon);box-shadow:0 0 9px var(--neon);animation:blip 1.2s infinite;}
+@keyframes blip{0%,100%{opacity:1;}50%{opacity:.25;}}
 
-body{
-  background:var(--dark);
-  color:var(--text);
-  font-family:'Rajdhani',sans-serif;
-  min-height:100vh;
-  overflow:hidden;
-}
+/* mobile menu toggle */
+#menu-toggle{display:none;background:transparent;border:1px solid var(--border);color:var(--neon);padding:5px 10px;border-radius:4px;font-size:1rem;cursor:pointer;}
 
-/* scanlines */
-body::before{
-  content:'';
-  position:fixed;inset:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,225,.012) 2px,rgba(0,255,225,.012) 4px);
-  pointer-events:none;z-index:9999;
-}
+/* ══ SHELL ══ */
+#shell{display:flex;height:calc(100vh - 48px);overflow:hidden;}
 
-/* ── HEADER ── */
-#hdr{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.7rem 1.5rem;
-  border-bottom:1px solid var(--border);
-  background:rgba(0,0,0,.5);
-  position:relative;z-index:200;
-  height:52px;
-}
-.logo{font-size:1.6rem;font-weight:700;letter-spacing:.15em;color:var(--neon);text-shadow:0 0 18px rgba(0,255,225,.45);}
-.logo span{color:var(--neon2);text-shadow:0 0 18px rgba(255,0,170,.45);}
-
-.status-bar{display:flex;gap:1.2rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--dim);align-items:center;}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#222;margin-right:5px;vertical-align:middle;transition:background .3s,box-shadow .3s;}
-.dot.ok  {background:var(--success);box-shadow:0 0 8px var(--success);}
-.dot.warn{background:var(--warn);box-shadow:0 0 8px var(--warn);}
-.dot.err {background:var(--fail);box-shadow:0 0 8px var(--fail);}
-.dot.vr  {background:var(--neon);box-shadow:0 0 10px var(--neon);animation:blip 1.2s infinite;}
-@keyframes blip{0%,100%{opacity:1;}50%{opacity:.3;}}
-
-/* ── LAYOUT ── */
-#app{
-  display:grid;
-  grid-template-columns:300px 1fr;
-  height:calc(100vh - 52px);
-}
-
-/* ── SIDEBAR ── */
-#sb{
-  border-right:1px solid var(--border);
-  background:rgba(0,0,0,.35);
-  overflow-y:auto;
-  display:flex;flex-direction:column;
-}
+/* ══ SIDEBAR ══ */
+#sb{width:var(--sb);flex-shrink:0;border-right:1px solid var(--border);background:rgba(0,0,0,.4);overflow-y:auto;display:flex;flex-direction:column;transition:transform .3s;z-index:200;}
 #sb::-webkit-scrollbar{width:3px;}
 #sb::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 
-.pnl{border-bottom:1px solid var(--border);padding:1rem 1.2rem;}
-.pnl-title{
-  font-size:.67rem;letter-spacing:.2em;color:var(--neon);
-  text-transform:uppercase;margin-bottom:.9rem;
-  display:flex;align-items:center;gap:8px;
-}
+.pnl{border-bottom:1px solid var(--border);padding:.9rem 1rem;}
+.pnl-title{font-size:.62rem;letter-spacing:.2em;color:var(--neon);text-transform:uppercase;margin-bottom:.8rem;display:flex;align-items:center;gap:6px;}
 .pnl-title::after{content:'';flex:1;height:1px;background:var(--border);}
 
 /* inputs */
-input[type=text]{
-  width:100%;
-  background:rgba(0,255,225,.05);
-  border:1px solid var(--border);
-  color:var(--text);
-  font-family:'Share Tech Mono',monospace;
-  font-size:.78rem;
-  padding:7px 10px;
-  border-radius:4px;outline:none;
-  transition:border-color .2s,box-shadow .2s;
-  margin-bottom:7px;
-}
-input[type=text]:focus{border-color:var(--neon);box-shadow:0 0 10px rgba(0,255,225,.2);}
+input[type=text],input[type=url]{width:100%;background:rgba(0,255,225,.05);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.75rem;padding:7px 9px;border-radius:4px;outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:6px;}
+input[type=text]:focus,input[type=url]:focus{border-color:var(--neon);box-shadow:0 0 10px rgba(0,255,225,.18);}
+.row{display:flex;gap:6px;margin-bottom:6px;}
+.row input{margin:0;}
 
-.row{display:flex;gap:7px;margin-bottom:7px;}
-.row input[type=text]{margin-bottom:0;}
-
-.btn{
-  background:transparent;
-  border:1px solid var(--neon);
-  color:var(--neon);
-  font-family:'Rajdhani',sans-serif;
-  font-size:.82rem;font-weight:600;
-  padding:7px 13px;border-radius:4px;
-  cursor:pointer;letter-spacing:.05em;
-  transition:background .2s,box-shadow .2s;white-space:nowrap;
-}
-.btn:hover{background:rgba(0,255,225,.1);box-shadow:0 0 14px rgba(0,255,225,.3);}
+.btn{background:transparent;border:1px solid var(--neon);color:var(--neon);font-family:'Rajdhani',sans-serif;font-size:.8rem;font-weight:600;padding:7px 11px;border-radius:4px;cursor:pointer;letter-spacing:.04em;transition:all .2s;white-space:nowrap;}
+.btn:hover,.btn:active{background:rgba(0,255,225,.1);box-shadow:0 0 12px rgba(0,255,225,.28);}
 .btn.pink{border-color:var(--neon2);color:var(--neon2);}
-.btn.pink:hover{background:rgba(255,0,170,.1);box-shadow:0 0 14px rgba(255,0,170,.3);}
-.btn.yellow{border-color:var(--neon3);color:var(--neon3);}
-.btn.yellow:hover{background:rgba(255,225,0,.08);box-shadow:0 0 14px rgba(255,225,0,.25);}
-.btn.full{width:100%;}
-.btn.glowing{background:rgba(0,255,225,.12);box-shadow:0 0 20px rgba(0,255,225,.35);animation:blip 1.4s infinite;}
+.btn.pink:hover,.btn.pink:active{background:rgba(255,0,170,.1);}
+.btn.full{width:100%;margin-bottom:5px;}
+.btn.glowing{background:rgba(0,255,225,.13);box-shadow:0 0 18px rgba(0,255,225,.32);animation:blip 1.4s infinite;}
 
-/* proxy status badge */
-.proxy-badge{
-  display:inline-flex;align-items:center;gap:5px;
-  font-family:'Share Tech Mono',monospace;font-size:.66rem;
-  padding:3px 8px;border-radius:3px;
-  border:1px solid var(--border);color:var(--dim);
-  margin-bottom:5px;width:100%;
-  transition:border-color .3s,color .3s;
-}
-.proxy-badge .dot{width:5px;height:5px;margin:0;}
-.proxy-badge.active{border-color:var(--success);color:var(--success);}
-.proxy-badge.testing{border-color:var(--warn);color:var(--warn);}
-.proxy-badge.dead{border-color:var(--fail);color:var(--fail);}
+/* proxy badges */
+.pbadge{display:flex;align-items:center;gap:5px;font-family:'Share Tech Mono',monospace;font-size:.62rem;padding:3px 7px;border-radius:3px;border:1px solid var(--border);color:var(--dim);margin-bottom:4px;transition:all .3s;}
+.pbadge .dot{margin:0;width:5px;height:5px;}
+.pbadge.active{border-color:var(--success);color:var(--success);}
+.pbadge.testing{border-color:var(--warn);color:var(--warn);}
+.pbadge.dead{border-color:var(--fail);color:var(--fail);}
 
 /* presets */
-.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
-.preset{
-  background:var(--panel);border:1px solid var(--border);
-  color:var(--dim);font-family:'Share Tech Mono',monospace;
-  font-size:.67rem;padding:6px 9px;border-radius:4px;
-  cursor:pointer;text-align:left;transition:all .2s;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.preset:hover{background:rgba(0,255,225,.07);border-color:rgba(0,255,225,.4);color:var(--neon);}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.preset{background:var(--panel);border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:.64rem;padding:5px 8px;border-radius:4px;cursor:pointer;text-align:left;transition:all .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.preset:hover,.preset:active{background:rgba(0,255,225,.07);border-color:rgba(0,255,225,.4);color:var(--neon);}
 
 /* sliders */
-.srow{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.slabel{font-size:.78rem;color:var(--dim);letter-spacing:.04em;}
-.swrap{display:flex;align-items:center;gap:7px;}
-input[type=range]{
-  -webkit-appearance:none;width:90px;height:3px;
-  background:var(--border);border-radius:2px;outline:none;
-}
-input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
-  background:var(--neon);cursor:pointer;box-shadow:0 0 7px rgba(0,255,225,.6);
-}
-.vdisp{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--neon);min-width:38px;text-align:right;}
+.srow{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.slabel{font-size:.75rem;color:var(--dim);}
+.swrap{display:flex;align-items:center;gap:6px;}
+input[type=range]{-webkit-appearance:none;width:85px;height:3px;background:var(--border);border-radius:2px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--neon);cursor:pointer;box-shadow:0 0 7px rgba(0,255,225,.55);}
+.vdisp{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--neon);min-width:36px;text-align:right;}
 
 /* toggle */
-.tog{position:relative;width:38px;height:19px;flex-shrink:0;}
+.tog{position:relative;width:36px;height:18px;flex-shrink:0;}
 .tog input{opacity:0;width:0;height:0;}
-.tslider{
-  position:absolute;inset:0;background:rgba(0,255,225,.08);
-  border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:background .2s;
-}
-.tslider::before{
-  content:'';position:absolute;width:13px;height:13px;
-  left:2px;top:2px;background:var(--dim);border-radius:50%;
-  transition:transform .2s,background .2s;
-}
-.tog input:checked+.tslider{background:rgba(0,255,225,.18);border-color:var(--neon);}
-.tog input:checked+.tslider::before{transform:translateX(19px);background:var(--neon);box-shadow:0 0 7px rgba(0,255,225,.6);}
+.tsl{position:absolute;inset:0;background:rgba(0,255,225,.07);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all .2s;}
+.tsl::before{content:'';position:absolute;width:12px;height:12px;left:2px;top:2px;background:var(--dim);border-radius:50%;transition:all .2s;}
+.tog input:checked+.tsl{background:rgba(0,255,225,.17);border-color:var(--neon);}
+.tog input:checked+.tsl::before{transform:translateX(18px);background:var(--neon);box-shadow:0 0 6px rgba(0,255,225,.55);}
 
 /* controller */
-.ctrl-box{
-  background:rgba(0,0,0,.4);border:1px solid var(--border);
-  border-radius:5px;padding:10px;margin-bottom:8px;
-  font-family:'Share Tech Mono',monospace;font-size:.68rem;
-}
-.ctrl-name{color:var(--neon);margin-bottom:7px;font-size:.72rem;}
-.ctrl-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;}
-.cbtn{color:var(--dim);transition:color .08s;}
-.cbtn.on{color:var(--neon);}
-.mrow{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
-.mlabel{color:var(--neon2);min-width:58px;font-family:'Share Tech Mono',monospace;font-size:.68rem;}
-.mrow select{
-  flex:1;background:var(--panel);border:1px solid var(--border);
-  color:var(--text);font-family:'Share Tech Mono',monospace;
-  font-size:.68rem;padding:4px 7px;border-radius:4px;outline:none;
-}
+.ctrl-box{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:5px;padding:9px;margin-bottom:7px;font-family:'Share Tech Mono',monospace;font-size:.65rem;}
+.ctrl-name{color:var(--neon);margin-bottom:6px;font-size:.7rem;}
+.ctrl-btns{display:flex;flex-wrap:wrap;gap:3px;}
+.cbtn{padding:1px 5px;border:1px solid var(--border);border-radius:3px;color:var(--dim);transition:all .08s;font-size:.6rem;}
+.cbtn.on{border-color:var(--neon);color:var(--neon);background:rgba(0,255,225,.1);}
+.axes-row{margin-top:6px;color:var(--dim);font-size:.62rem;}
+
+/* mapping */
+.mrow{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.mlabel{color:var(--neon2);min-width:64px;font-family:'Share Tech Mono',monospace;font-size:.65rem;flex-shrink:0;}
+.mrow select{flex:1;background:var(--panel);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.65rem;padding:4px 6px;border-radius:4px;outline:none;}
 .mrow select:focus{border-color:var(--neon);}
 
-/* ── MAIN VIEW ── */
-#mv{position:relative;overflow:hidden;background:#000;}
+/* ══ MAIN VIEW ══ */
+#mv{flex:1;position:relative;overflow:hidden;background:#000;min-width:0;}
 
-#ph{
-  position:absolute;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:.8rem;
-  color:var(--dim);pointer-events:none;
+#ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7rem;color:var(--dim);pointer-events:none;}
+.ph-icon{font-size:3.5rem;opacity:.18;filter:grayscale(1);}
+.ph-txt{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:.1em;opacity:.35;text-align:center;padding:0 1rem;}
+
+/* ── VR SPLIT ── */
+#vr-wrap{position:absolute;inset:0;display:none;flex-direction:row;}
+#vr-wrap.on{display:flex;}
+
+/* divider */
+#vr-divider{width:6px;background:#000;flex-shrink:0;z-index:5;}
+
+.eye{flex:1;position:relative;overflow:hidden;}
+.eye iframe{
+  position:absolute;
+  top:0;left:0;
+  /* We set width/height via JS based on scale */
+  border:none;
+  transform-origin:top left;
 }
-.ph-icon{font-size:4.5rem;opacity:.2;filter:grayscale(1);}
-.ph-text{font-family:'Share Tech Mono',monospace;font-size:.8rem;letter-spacing:.12em;opacity:.4;}
 
-/* frames */
-#sf{width:100%;height:100%;border:none;display:none;}
+/* single frame */
+#sf{position:absolute;inset:0;width:100%;height:100%;border:none;display:none;}
 
-#split{position:absolute;inset:0;display:none;}
-#split.on{display:flex;}
-#split::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:5px;background:#000;transform:translateX(-50%);z-index:10;}
+/* HUD */
+#hud{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none;}
+#mv:hover #hud,#mv:focus-within #hud{opacity:1;pointer-events:all;}
+.hbtn{background:rgba(0,0,0,.8);border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.7rem;padding:5px 10px;border-radius:4px;cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;}
+.hbtn:hover,.hbtn:active{border-color:var(--neon);color:var(--neon);}
 
-.eye{flex:1;overflow:hidden;position:relative;}
-.eye iframe{position:absolute;top:0;left:0;width:200%;height:100%;border:none;transform-origin:0 0;transform:scale(.5);}
-.eye-r iframe{left:-100%;}
-
-/* hud */
-#hud{
-  position:absolute;top:10px;left:50%;transform:translateX(-50%);
-  display:flex;gap:6px;z-index:50;
-  opacity:0;transition:opacity .3s;
+/* mobile HUD always visible */
+@media(max-width:768px){
+  #hud{opacity:1;pointer-events:all;top:6px;}
 }
-#mv:hover #hud{opacity:1;}
-.hbtn{
-  background:rgba(0,0,0,.75);border:1px solid var(--border);
-  color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:600;
-  font-size:.72rem;letter-spacing:.07em;padding:5px 12px;
-  border-radius:4px;cursor:pointer;backdrop-filter:blur(4px);
-  transition:all .2s;
-}
-.hbtn:hover{border-color:var(--neon);color:var(--neon);}
 
 /* crosshair */
 #xh{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:20;display:none;}
 #xh.on{display:block;}
 .xh-h,.xh-v{position:absolute;background:rgba(0,255,225,.75);}
-.xh-h{width:22px;height:1px;top:50%;left:50%;transform:translate(-50%,-50%);}
-.xh-v{height:22px;width:1px;top:50%;left:50%;transform:translate(-50%,-50%);}
+.xh-h{width:20px;height:1px;top:50%;left:50%;transform:translate(-50%,-50%);}
+.xh-v{height:20px;width:1px;top:50%;left:50%;transform:translate(-50%,-50%);}
 
 /* gyro bar */
-#gyrobar{
-  position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,.75);border:1px solid var(--border);
-  border-radius:5px;padding:7px 14px;font-family:'Share Tech Mono',monospace;
-  font-size:.7rem;color:var(--neon);z-index:50;
-  display:none;gap:14px;backdrop-filter:blur(4px);
-}
+#gyrobar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);border:1px solid var(--border);border-radius:4px;padding:6px 12px;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--neon);z-index:60;display:none;gap:12px;}
 #gyrobar.on{display:flex;}
 
-/* loading overlay */
-#loading{
-  position:absolute;inset:0;background:rgba(4,10,16,.85);
-  display:none;flex-direction:column;align-items:center;justify-content:center;
-  gap:1rem;z-index:100;
-}
+/* loading */
+#loading{position:absolute;inset:0;background:rgba(4,10,16,.88);display:none;flex-direction:column;align-items:center;justify-content:center;gap:.9rem;z-index:100;}
 #loading.on{display:flex;}
-.spinner{
-  width:40px;height:40px;border:2px solid var(--border);
-  border-top-color:var(--neon);border-radius:50%;
-  animation:spin .8s linear infinite;
-}
+.spinner{width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--neon);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.load-text{font-family:'Share Tech Mono',monospace;font-size:.8rem;color:var(--neon);letter-spacing:.1em;}
+.load-txt{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--neon);letter-spacing:.08em;}
 
 /* notif */
-#notif{
-  position:fixed;bottom:20px;right:20px;
-  background:rgba(0,0,0,.88);border:1px solid var(--neon);
-  color:var(--neon);font-family:'Share Tech Mono',monospace;
-  font-size:.75rem;padding:9px 16px;border-radius:4px;
-  z-index:10000;transform:translateY(70px);opacity:0;
-  transition:all .3s;box-shadow:0 0 18px rgba(0,255,225,.18);
-  max-width:320px;line-height:1.4;
-}
+#notif{position:fixed;bottom:16px;right:16px;background:rgba(0,0,0,.9);border:1px solid var(--neon);color:var(--neon);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:8px 14px;border-radius:4px;z-index:10000;transform:translateY(60px);opacity:0;transition:all .3s;max-width:300px;line-height:1.4;}
 #notif.on{transform:translateY(0);opacity:1;}
 #notif.err{border-color:var(--fail);color:var(--fail);}
 #notif.warn{border-color:var(--warn);color:var(--warn);}
 
-/* no ctrl */
-#noctrl{text-align:center;color:var(--dim);font-size:.75rem;padding:16px;font-family:'Share Tech Mono',monospace;}
+/* ══ MOBILE ══ */
+@media(max-width:768px){
+  #menu-toggle{display:block;}
+  .status-bar{display:none;}
 
-@keyframes fadein{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-.pnl{animation:fadein .35s ease both;}
-.pnl:nth-child(1){animation-delay:.04s;}
-.pnl:nth-child(2){animation-delay:.08s;}
-.pnl:nth-child(3){animation-delay:.12s;}
-.pnl:nth-child(4){animation-delay:.16s;}
-.pnl:nth-child(5){animation-delay:.20s;}
-.pnl:nth-child(6){animation-delay:.24s;}
+  /* Shell stays flex-row — sidebar slides in from left OVER the content */
+  #shell{position:relative;}
+
+  #sb{
+    position:fixed;
+    top:48px;
+    left:0;
+    bottom:0;
+    width:82vw;
+    max-width:320px;
+    transform:translateX(-105%);
+    border-right:1px solid var(--border);
+    border-top:none;
+    box-shadow:4px 0 24px rgba(0,0,0,.7);
+    z-index:500;
+  }
+  #sb.open{transform:translateX(0);}
+
+  /* dim overlay behind drawer */
+  #sb-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    top:48px;
+    background:rgba(0,0,0,.55);
+    z-index:499;
+  }
+  #sb-overlay.on{display:block;}
+
+  /* main view always fills full width */
+  #mv{position:absolute;inset:0;top:0;width:100%;height:100%;}
+
+  /* VR on mobile: stacked vertically for portrait cardboard */
+  #vr-wrap.portrait{flex-direction:column;}
+  #vr-wrap.portrait #vr-divider{width:100%;height:5px;}
+}
+
+/* no ctrl */
+#noctrl{text-align:center;color:var(--dim);font-size:.72rem;padding:14px;font-family:'Share Tech Mono',monospace;}
 </style>
 </head>
 <body>
 
+<svg style="position:absolute;width:0;height:0">
+  <defs>
+    <filter id="bl" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="turbulence" baseFrequency="0.015" numOctaves="1" result="turb"/>
+      <feDisplacementMap in="SourceGraphic" in2="turb" id="dml" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="br" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="turbulence" baseFrequency="0.015" numOctaves="1" result="turb"/>
+      <feDisplacementMap in="SourceGraphic" in2="turb" id="dmr" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
 <!-- HEADER -->
 <div id="hdr">
-  <div class="logo">VOID<span>VR</span> <span style="font-size:.7rem;color:var(--dim);letter-spacing:.05em;font-weight:300">PROXY EDITION</span></div>
-  <div class="status-bar">
-    <span><span class="dot" id="d-proxy"></span>PROXY</span>
-    <span><span class="dot" id="d-site"></span>SITE</span>
-    <span><span class="dot" id="d-vr"></span>VR</span>
-    <span><span class="dot" id="d-ctrl"></span>CTRL</span>
-    <span><span class="dot" id="d-gyro"></span>GYRO</span>
+  <div class="logo">VOID<span>VR</span></div>
+  <div class="hdr-right">
+    <div class="status-bar">
+      <span><span class="dot" id="d-proxy"></span>PROXY</span>
+      <span><span class="dot" id="d-site"></span>SITE</span>
+      <span><span class="dot" id="d-vr"></span>VR</span>
+      <span><span class="dot" id="d-ctrl"></span>CTRL</span>
+    </div>
+    <button id="menu-toggle" onclick="toggleMenu()">☰</button>
   </div>
 </div>
 
-<div id="app">
+<div id="sb-overlay" onclick="closeMobileMenu()"></div>
+<div id="shell">
 
-<!-- ── SIDEBAR ── -->
+<!-- ══ SIDEBAR ══ -->
 <div id="sb">
 
-  <!-- URL -->
+  <!-- URL INPUT -->
   <div class="pnl">
     <div class="pnl-title">Target URL</div>
-    <div class="row">
-      <input type="text" id="url-in" placeholder="https://store.steampowered.com" />
-      <button class="btn" onclick="loadSite()">GO</button>
-    </div>
-    <button class="btn full" onclick="loadSite()" style="margin-bottom:7px">⚡ LOAD VIA PROXY</button>
-    <div style="display:flex;gap:7px">
-      <button class="btn pink" onclick="loadDirect()" style="flex:1;font-size:.75rem">↗ DIRECT (no proxy)</button>
-      <button class="btn yellow" onclick="openExternal()" style="font-size:.75rem" title="Open in new tab">⬡</button>
+    <input type="url" id="url-in" placeholder="https://www.youtube.com" />
+    <button class="btn full" onclick="loadSite()">⚡ LOAD</button>
+    <div style="display:flex;gap:6px">
+      <button class="btn pink" style="flex:1;font-size:.72rem" onclick="loadDirect()">↗ DIRECT</button>
+      <button class="btn" style="font-size:.72rem;padding:7px 9px" onclick="openExternal()" title="New tab">⬡</button>
     </div>
   </div>
 
-  <!-- PROXY STATUS -->
+  <!-- PROXY -->
   <div class="pnl">
     <div class="pnl-title">Proxy Chain</div>
     <div id="proxy-list"></div>
-    <div class="row" style="margin-top:8px">
-      <input type="text" id="cf-worker" placeholder="https://pohh.tflanigan.workers.dev" style="margin:0;font-size:.7rem"/>
-      <button class="btn" onclick="setCFWorker()" style="font-size:.75rem">SET</button>
+    <div class="row" style="margin-top:7px">
+      <input type="url" id="cf-in" placeholder="https://pohh.tflanigan.workers.dev" style="margin:0;font-size:.68rem"/>
+      <button class="btn" style="font-size:.72rem" onclick="setCF()">SET</button>
     </div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--dim);margin-top:6px;line-height:1.5">
-      Your Cloudflare Worker goes first. Falls back to public proxies automatically.
-    </div>
-    <button class="btn full" style="margin-top:8px;font-size:.75rem" onclick="testAllProxies()">⟳ TEST ALL PROXIES</button>
+    <button class="btn full" style="margin-top:6px;font-size:.72rem" onclick="testAll()">⟳ TEST PROXIES</button>
   </div>
 
   <!-- PRESETS -->
   <div class="pnl">
     <div class="pnl-title">Quick Load</div>
-    <div class="preset-grid" id="preset-grid"></div>
+    <div class="pgrid" id="pgrid"></div>
   </div>
 
   <!-- VR SETTINGS -->
   <div class="pnl">
     <div class="pnl-title">VR / Display</div>
-
     <div class="srow">
       <span class="slabel">CARDBOARD SPLIT</span>
-      <label class="tog"><input type="checkbox" id="tog-vr" onchange="toggleVR()"><span class="tslider"></span></label>
+      <label class="tog"><input type="checkbox" id="tog-vr" onchange="toggleVR()"><span class="tsl"></span></label>
     </div>
     <div class="srow">
-      <span class="slabel">IPD (eye dist)</span>
+      <span class="slabel">PORTRAIT MODE</span>
+      <label class="tog"><input type="checkbox" id="tog-portrait" onchange="togglePortrait()"><span class="tsl"></span></label>
+    </div>
+    <div class="srow">
+      <span class="slabel">IPD</span>
       <div class="swrap">
-        <input type="range" id="ipd" min="40" max="80" value="63" step="1" oninput="updateIPD(this)">
+        <input type="range" id="ipd" min="40" max="80" value="63" oninput="updateIPD(this)">
         <span class="vdisp" id="ipd-v">63mm</span>
       </div>
     </div>
     <div class="srow">
       <span class="slabel">ZOOM</span>
       <div class="swrap">
-        <input type="range" id="zoom" min="50" max="200" value="100" step="1" oninput="updateZoom(this)">
+        <input type="range" id="zoom" min="50" max="200" value="100" oninput="updateZoom(this)">
         <span class="vdisp" id="zoom-v">100%</span>
       </div>
     </div>
     <div class="srow">
-      <span class="slabel">BARREL DISTORT</span>
+      <span class="slabel">BARREL</span>
       <div class="swrap">
-        <input type="range" id="barrel" min="0" max="80" value="0" step="1" oninput="updateBarrel(this)">
+        <input type="range" id="barrel" min="0" max="80" value="0" oninput="updateBarrel(this)">
         <span class="vdisp" id="barrel-v">0</span>
       </div>
     </div>
     <div class="srow">
       <span class="slabel">CROSSHAIR</span>
-      <label class="tog"><input type="checkbox" id="tog-xh" onchange="toggleXH()"><span class="tslider"></span></label>
+      <label class="tog"><input type="checkbox" id="tog-xh" onchange="toggleXH()"><span class="tsl"></span></label>
     </div>
     <div class="srow">
       <span class="slabel">GYROSCOPE</span>
-      <label class="tog"><input type="checkbox" id="tog-gyro" onchange="toggleGyro()"><span class="tslider"></span></label>
+      <label class="tog"><input type="checkbox" id="tog-gyro" onchange="toggleGyro()"><span class="tsl"></span></label>
     </div>
-    <div style="display:flex;gap:7px;margin-top:6px">
+    <div style="display:flex;gap:6px;margin-top:5px">
       <button class="btn" id="vr-btn" onclick="document.getElementById('tog-vr').click()" style="flex:1">⬡ ENTER VR</button>
-      <button class="btn" onclick="requestFS()" title="Fullscreen" style="padding:7px 10px">⛶</button>
+      <button class="btn" onclick="requestFS()" style="padding:7px 9px">⛶</button>
     </div>
   </div>
 
   <!-- CONTROLLER -->
   <div class="pnl">
     <div class="pnl-title">Controller</div>
-    <div id="ctrl-area"><div id="noctrl"><div style="font-size:1.8rem;opacity:.25;margin-bottom:6px">🎮</div><div>No controller detected</div><div style="margin-top:5px;font-size:.62rem;opacity:.55">Press any button on your gamepad</div></div></div>
+    <div id="ctrl-area">
+      <div id="noctrl">
+        <div style="font-size:1.6rem;opacity:.22;margin-bottom:5px">🎮</div>
+        <div>No controller detected</div>
+        <div style="margin-top:4px;font-size:.6rem;opacity:.5">Press any button on your gamepad</div>
+      </div>
+    </div>
   </div>
 
   <!-- BUTTON MAPPING -->
   <div class="pnl">
     <div class="pnl-title">Button Mapping</div>
-    <div id="map-area"><div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--dim);text-align:center;padding:8px 0">Connect a controller first</div></div>
+    <div id="map-area">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--dim);text-align:center;padding:6px 0">Connect a controller first</div>
+    </div>
   </div>
 
-</div><!-- /sidebar -->
+</div><!-- /sb -->
 
-<!-- ── MAIN VIEW ── -->
+<!-- ══ MAIN VIEW ══ -->
 <div id="mv">
 
   <div id="ph">
     <div class="ph-icon">🥽</div>
-    <div class="ph-text">// LOAD ANY SITE — PROXY ACTIVE //</div>
+    <div class="ph-txt">// LOAD ANY SITE //<br>TRANSLATE + PROXY ROUTING ACTIVE</div>
   </div>
 
   <!-- HUD -->
   <div id="hud">
-    <button class="hbtn" onclick="navBack()">◀ BACK</button>
-    <button class="hbtn" onclick="navFwd()">FWD ▶</button>
-    <button class="hbtn" onclick="reload()">↻</button>
-    <button class="hbtn" onclick="document.getElementById('tog-vr').click()">⬡ VR</button>
+    <button class="hbtn" onclick="navBack()">◀</button>
+    <button class="hbtn" onclick="navFwd()">▶</button>
+    <button class="hbtn" onclick="doReload()">↻</button>
+    <button class="hbtn" onclick="document.getElementById('tog-vr').click()">VR</button>
     <button class="hbtn" onclick="requestFS()">⛶</button>
-    <button class="hbtn" onclick="openExternal()">↗ TAB</button>
+    <button class="hbtn" onclick="openExternal()">↗</button>
   </div>
 
-  <!-- CROSSHAIR -->
+  <!-- crosshair -->
   <div id="xh"><div class="xh-h"></div><div class="xh-v"></div></div>
 
-  <!-- LOADING -->
+  <!-- loading -->
   <div id="loading">
     <div class="spinner"></div>
-    <div class="load-text" id="load-msg">ROUTING THROUGH PROXY...</div>
+    <div class="load-txt" id="load-msg">ROUTING...</div>
   </div>
 
-  <!-- NORMAL FRAME -->
-  <iframe id="sf" src="" allowfullscreen sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"></iframe>
+  <!-- SINGLE FRAME -->
+  <iframe id="sf"
+    allowfullscreen
+    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation allow-downloads"
+  ></iframe>
 
-  <!-- SPLIT VR -->
-  <div id="split">
-    <div class="eye eye-l"><iframe id="fl" src="" allowfullscreen sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"></iframe></div>
-    <div class="eye eye-r"><iframe id="fr" src="" allowfullscreen sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"></iframe></div>
+  <!-- VR SPLIT -->
+  <div id="vr-wrap">
+    <div class="eye" id="eye-l">
+      <iframe id="fl"
+        allowfullscreen
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation allow-downloads"
+      ></iframe>
+    </div>
+    <div id="vr-divider"></div>
+    <div class="eye" id="eye-r">
+      <iframe id="fr"
+        allowfullscreen
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation allow-downloads"
+      ></iframe>
+    </div>
   </div>
 
-  <!-- GYRO BAR -->
+  <!-- gyro -->
   <div id="gyrobar">
-    <span>α:<span id="ga" style="color:var(--text);margin-left:4px">0°</span></span>
-    <span>β:<span id="gb" style="color:var(--text);margin-left:4px">0°</span></span>
-    <span>γ:<span id="gc" style="color:var(--text);margin-left:4px">0°</span></span>
+    <span>α:<span id="ga" style="color:var(--text);margin-left:3px">0°</span></span>
+    <span>β:<span id="gb" style="color:var(--text);margin-left:3px">0°</span></span>
+    <span>γ:<span id="gc" style="color:var(--text);margin-left:3px">0°</span></span>
   </div>
 
 </div><!-- /mv -->
-</div><!-- /app -->
+</div><!-- /shell -->
 
-<!-- SVG barrel filter -->
-<svg style="position:absolute;width:0;height:0">
-  <defs>
-    <filter id="bl" x="-15%" y="-15%" width="130%" height="130%">
-      <feTurbulence type="turbulence" baseFrequency="0" numOctaves="1" result="turb"/>
-      <feDisplacementMap in="SourceGraphic" in2="turb" id="dml" scale="0" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-    <filter id="br" x="-15%" y="-15%" width="130%" height="130%">
-      <feTurbulence type="turbulence" baseFrequency="0" numOctaves="1" result="turb"/>
-      <feDisplacementMap in="SourceGraphic" in2="turb" id="dmr" scale="0" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-  </defs>
-</svg>
-
-<!-- NOTIF -->
 <div id="notif"></div>
 
 <script>
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // STATE
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 const S = {
   url: '',
   proxyUrl: '',
   vrMode: false,
+  portrait: false,
   xhair: false,
   gyro: false,
   ipd: 63, zoom: 100, barrel: 0,
   controllers: {},
-  mappings: {},
+  mappings: {},   // key: "gpIdx_btnIdx" → action string
   pollId: null,
-  activeProxy: null,
   cfWorker: localStorage.getItem('cf_worker') || 'https://pohh.tflanigan.workers.dev',
+  menuOpen: false,
 };
 
-// ── PROXY CHAIN ──────────────────────────────────
-// Priority order: CF Worker → allorigins → corsproxy.io → cors.sh → thingproxy
-const buildProxies = () => [
-  {
-    id: 'cf',
-    name: S.cfWorker ? new URL(S.cfWorker).hostname : 'CF Worker',
-    label: 'YOUR CF WORKER',
-    build: (url) => S.cfWorker ? `${S.cfWorker.replace(/\/$/, '')}/?url=${encodeURIComponent(url)}` : null,
-    status: 'unknown',
-    priority: 0,
-  },
-  {
-    id: 'allorigins',
-    name: 'allorigins.win',
-    label: 'ALL ORIGINS',
-    build: (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    status: 'unknown',
-    priority: 1,
-  },
-  {
-    id: 'corsproxy',
-    name: 'corsproxy.io',
-    label: 'CORS PROXY',
-    build: (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-    status: 'unknown',
-    priority: 2,
-  },
-  {
-    id: 'corssh',
-    name: 'proxy.cors.sh',
-    label: 'CORS.SH',
-    build: (url) => `https://proxy.cors.sh/${url}`,
-    status: 'unknown',
-    priority: 3,
-  },
-  {
-    id: 'thingproxy',
-    name: 'thingproxy.freeboard.io',
-    label: 'THING PROXY',
-    build: (url) => `https://thingproxy.freeboard.io/fetch/${url}`,
-    status: 'unknown',
-    priority: 4,
-  },
-];
-
-let PROXIES = buildProxies();
-
-const PRESETS = [
-  { label: 'Steam Store',   url: 'https://store.steampowered.com' },
-  { label: 'GitHub',        url: 'https://github.com' },
-  { label: 'YouTube',       url: 'https://www.youtube.com' },
-  { label: 'Wikipedia',     url: 'https://en.wikipedia.org/wiki/Main_Page' },
-  { label: 'HackerNews',   url: 'https://news.ycombinator.com' },
-  { label: 'Reddit',        url: 'https://www.reddit.com' },
-  { label: 'NASA',          url: 'https://www.nasa.gov' },
-  { label: 'OpenStreetMap', url: 'https://www.openstreetmap.org' },
-  { label: 'Archive.org',   url: 'https://archive.org' },
-  { label: 'XKCD',          url: 'https://xkcd.com' },
-];
-
-const BTN_ACTIONS = [
-  'None','Scroll Up','Scroll Down','Scroll Left','Scroll Right',
-  'Zoom In','Zoom Out','Toggle VR','Navigate Back','Navigate Forward',
-  'Reload','Click Center','Toggle Crosshair','Fullscreen',
-];
-
-// ════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════
-function init() {
-  buildPresets();
-  renderProxyList();
-  setupGamepad();
-  setupGyro();
-  // Restore CF worker input
-  document.getElementById('cf-worker').value = S.cfWorker;
-  notify('VOID VR Proxy Edition — ready 🔥');
-  testAllProxies();
+// ══════════════════════════════════════════════════════
+// URL → translate.goog → CF Worker
+// ══════════════════════════════════════════════════════
+function toTranslate(rawUrl) {
+  // Convert https://store.steampowered.com/path
+  // → https://store-steampowered-com.translate.goog/path?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=en&_x_tr_pto=wapp
+  let u;
+  try { u = new URL(rawUrl); } catch { return null; }
+  const hostDashed = u.hostname.replace(/\./g, '-');
+  const params = new URLSearchParams({
+    _x_tr_sl: 'auto',
+    _x_tr_tl: 'en',
+    _x_tr_hl: 'en',
+    _x_tr_pto: 'wapp',
+  });
+  // Preserve existing query params
+  u.searchParams.forEach((v,k) => params.set(k,v));
+  return `https://${hostDashed}.translate.goog${u.pathname}?${params.toString()}`;
 }
 
+function throughCF(translatedUrl) {
+  if (!S.cfWorker) return translatedUrl;
+  return S.cfWorker.replace(/\/$/, '') + '/?url=' + encodeURIComponent(translatedUrl);
+}
+
+function buildProxyUrl(rawUrl) {
+  const t = toTranslate(rawUrl);
+  if (!t) return rawUrl;
+  return throughCF(t);
+}
+
+// ══════════════════════════════════════════════════════
+// PROXY CHAIN UI (now just shows translate + CF)
+// ══════════════════════════════════════════════════════
+const PROXY_DEFS = () => [
+  { id:'translate', label:'GOOGLE TRANSLATE', name:'*.translate.goog', status:'ok' },
+  { id:'cf',        label:'CF WORKER',        name: S.cfWorker ? new URL(S.cfWorker).hostname : 'not set', status: S.cfWorker ? 'ok' : 'warn' },
+];
+
+function renderProxyList() {
+  const el = document.getElementById('proxy-list');
+  el.innerHTML = '';
+  PROXY_DEFS().forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'pbadge ' + (p.status === 'ok' ? 'active' : p.status === 'warn' ? 'testing' : 'dead');
+    d.innerHTML = `<span class="dot ${p.status === 'ok' ? 'ok' : p.status === 'warn' ? 'warn' : 'err'}"></span><span style="flex:1">${p.label}</span><span style="opacity:.5;font-size:.58rem;overflow:hidden;text-overflow:ellipsis">${p.name}</span>`;
+    el.appendChild(d);
+  });
+  dot('d-proxy', S.cfWorker ? 'ok' : 'warn');
+}
+
+async function testAll() {
+  notify('Testing translate.goog...');
+  try {
+    const testUrl = toTranslate('https://example.com');
+    const r = await fetch(testUrl, { mode: 'no-cors' });
+    notify('✓ translate.goog reachable');
+    dot('d-proxy', 'ok');
+  } catch {
+    notify('translate.goog unreachable — check connection', 'warn');
+  }
+  renderProxyList();
+}
+
+function setCF() {
+  const v = document.getElementById('cf-in').value.trim().replace(/\/$/, '');
+  if (!v) return;
+  S.cfWorker = v;
+  localStorage.setItem('cf_worker', v);
+  renderProxyList();
+  notify('CF Worker updated: ' + v);
+}
+
+// ══════════════════════════════════════════════════════
+// PRESETS
+// ══════════════════════════════════════════════════════
+const PRESETS = [
+  { label:'YouTube',    url:'https://www.youtube.com' },
+  { label:'Steam',      url:'https://store.steampowered.com' },
+  { label:'Reddit',     url:'https://www.reddit.com' },
+  { label:'GitHub',     url:'https://github.com' },
+  { label:'Wikipedia',  url:'https://en.wikipedia.org' },
+  { label:'Twitch',     url:'https://www.twitch.tv' },
+  { label:'NASA',       url:'https://www.nasa.gov' },
+  { label:'HackerNews', url:'https://news.ycombinator.com' },
+  { label:'Archive',    url:'https://archive.org' },
+  { label:'XKCD',       url:'https://xkcd.com' },
+];
+
 function buildPresets() {
-  const g = document.getElementById('preset-grid');
+  const g = document.getElementById('pgrid');
   PRESETS.forEach(p => {
     const b = document.createElement('button');
     b.className = 'preset'; b.textContent = p.label; b.title = p.url;
@@ -571,122 +522,30 @@ function buildPresets() {
   });
 }
 
-// ════════════════════════════════════════════════
-// PROXY LIST UI
-// ════════════════════════════════════════════════
-function renderProxyList() {
-  const el = document.getElementById('proxy-list');
-  el.innerHTML = '';
-  PROXIES.forEach(p => {
-    const badge = document.createElement('div');
-    badge.className = 'proxy-badge' + (p.status === 'ok' ? ' active' : p.status === 'testing' ? ' testing' : p.status === 'dead' ? ' dead' : '');
-    badge.id = 'proxy-badge-' + p.id;
-    const icon = p.status === 'ok' ? 'ok' : p.status === 'testing' ? 'warn' : p.status === 'dead' ? 'err' : '';
-    badge.innerHTML = `<span class="dot ${icon}"></span><span style="flex:1">${p.label}</span><span style="opacity:.5">${p.name}</span>`;
-    if (S.activeProxy === p.id) badge.style.borderColor = 'var(--neon)';
-    el.appendChild(badge);
-  });
-}
-
-function setProxyStatus(id, status) {
-  const p = PROXIES.find(x => x.id === id);
-  if (p) p.status = status;
-  const badge = document.getElementById('proxy-badge-' + id);
-  if (!badge) return;
-  badge.className = 'proxy-badge' + (status === 'ok' ? ' active' : status === 'testing' ? ' testing' : status === 'dead' ? ' dead' : '');
-  const dot = badge.querySelector('.dot');
-  if (dot) dot.className = 'dot ' + (status === 'ok' ? 'ok' : status === 'testing' ? 'warn' : status === 'dead' ? 'err' : '');
-}
-
-async function testAllProxies() {
-  const testUrl = 'https://example.com';
-  dot('d-proxy', 'warn');
-  for (const p of PROXIES) {
-    setProxyStatus(p.id, 'testing');
-    const built = p.build(testUrl);
-    if (!built) { setProxyStatus(p.id, 'dead'); continue; }
-    try {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 5000);
-      const r = await fetch(built, { signal: ctrl.signal, mode: 'cors' });
-      clearTimeout(timer);
-      setProxyStatus(p.id, r.ok ? 'ok' : 'dead');
-    } catch {
-      setProxyStatus(p.id, 'dead');
-    }
-  }
-  const first = PROXIES.find(p => p.status === 'ok');
-  if (first) { S.activeProxy = first.id; dot('d-proxy', 'ok'); }
-  else { dot('d-proxy', 'err'); notify('⚠ All public proxies unreachable — try direct or set CF Worker', 'err'); }
-  renderProxyList();
-}
-
-function setCFWorker() {
-  const val = document.getElementById('cf-worker').value.trim();
-  if (!val) return;
-  S.cfWorker = val.endsWith('/') ? val.slice(0, -1) : val;
-  localStorage.setItem('cf_worker', S.cfWorker);
-  PROXIES = buildProxies();
-  renderProxyList();
-  notify('CF Worker set: ' + S.cfWorker);
-  testAllProxies();
-}
-
-// ════════════════════════════════════════════════
-// LOAD SITE
-// ════════════════════════════════════════════════
-async function loadSite() {
+// ══════════════════════════════════════════════════════
+// LOAD
+// ══════════════════════════════════════════════════════
+function loadSite() {
   let url = document.getElementById('url-in').value.trim();
   if (!url) return;
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
   document.getElementById('url-in').value = url;
   S.url = url;
+  S.proxyUrl = buildProxyUrl(url);
 
-  showLoading('FINDING BEST PROXY...');
+  showLoading('ROUTING: translate → CF Worker...');
   dot('d-site', 'warn');
 
-  // Try proxies in order until one works
-  const working = PROXIES.filter(p => p.status !== 'dead' && p.build(url));
-  if (working.length === 0) {
-    // Force try anyway
-    working.push(...PROXIES.filter(p => p.build(url)));
-  }
-
-  let proxyUrl = null;
-  for (const p of working) {
-    const built = p.build(url);
-    if (!built) continue;
-    setLoadMsg(`TRYING ${p.label}...`);
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 6000);
-      const r = await fetch(built, { signal: ctrl.signal, mode: 'cors' });
-      clearTimeout(t);
-      if (r.ok || r.status === 200) {
-        proxyUrl = built;
-        S.activeProxy = p.id;
-        setProxyStatus(p.id, 'ok');
-        notify(`✓ Routing via ${p.label}`);
-        break;
-      }
-    } catch {}
-    setProxyStatus(p.id, 'dead');
-  }
-
-  renderProxyList();
-
-  if (!proxyUrl) {
-    // Last resort: try first available anyway (iframe might still load)
-    const fallback = PROXIES.find(p => p.build(url));
-    if (fallback) proxyUrl = fallback.build(url);
-    notify('⚠ Proxy test failed — attempting load anyway', 'warn');
-  }
-
-  S.proxyUrl = proxyUrl || url;
-  hideLoading();
-  dot('d-site', 'ok');
   document.getElementById('ph').style.display = 'none';
-  renderFrames();
+  closeMobileMenu();
+
+  // Small delay so loading shows, then inject
+  setTimeout(() => {
+    hideLoading();
+    dot('d-site', 'ok');
+    renderFrames();
+    notify('✓ Loaded via translate.goog → CF Worker');
+  }, 600);
 }
 
 function loadDirect() {
@@ -694,34 +553,87 @@ function loadDirect() {
   if (!url) return;
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
   S.url = url; S.proxyUrl = url;
-  dot('d-site', 'ok');
   document.getElementById('ph').style.display = 'none';
   renderFrames();
-  notify('Loading direct (no proxy)');
+  closeMobileMenu();
+  notify('Direct load (no proxy)');
+  dot('d-site', 'ok');
 }
 
 function openExternal() {
-  const url = document.getElementById('url-in').value.trim() || S.url;
+  const url = S.url || document.getElementById('url-in').value.trim();
   if (url) window.open(url, '_blank');
 }
 
+// ══════════════════════════════════════════════════════
+// FRAME RENDERING — FIXED SBS
+// ══════════════════════════════════════════════════════
 function renderFrames() {
   if (S.vrMode) {
     document.getElementById('sf').style.display = 'none';
-    document.getElementById('split').classList.add('on');
-    document.getElementById('fl').src = S.proxyUrl;
-    document.getElementById('fr').src = S.proxyUrl;
-    applyIPD(); applyBarrel();
+    document.getElementById('vr-wrap').classList.add('on');
+    setSBSFrames();
   } else {
-    document.getElementById('split').classList.remove('on');
+    document.getElementById('vr-wrap').classList.remove('on');
     document.getElementById('sf').style.display = 'block';
     document.getElementById('sf').src = S.proxyUrl;
   }
 }
 
-// ════════════════════════════════════════════════
-// VR
-// ════════════════════════════════════════════════
+function setSBSFrames() {
+  const wrap = document.getElementById('vr-wrap');
+  const eyeL = document.getElementById('eye-l');
+  const eyeR = document.getElementById('eye-r');
+  const fl   = document.getElementById('fl');
+  const fr   = document.getElementById('fr');
+
+  // Measure available space AFTER layout
+  requestAnimationFrame(() => {
+    const portrait = S.portrait;
+    const divSize  = 6;
+
+    let eyeW, eyeH;
+    if (portrait) {
+      // Vertical split: each eye gets full width, half height
+      eyeW = wrap.clientWidth;
+      eyeH = (wrap.clientHeight - divSize) / 2;
+    } else {
+      // Horizontal split: each eye gets half width, full height
+      eyeW = (wrap.clientWidth - divSize) / 2;
+      eyeH = wrap.clientHeight;
+    }
+
+    const scale = S.zoom / 100;
+    // iframe is rendered at full page width/height then scaled down
+    const iframeW = eyeW / scale;
+    const iframeH = eyeH / scale;
+    const ipdOff  = (S.ipd - 63) * 0.4;
+
+    [fl, fr].forEach((f, i) => {
+      f.style.width  = iframeW + 'px';
+      f.style.height = iframeH + 'px';
+      f.style.transform = `scale(${scale})`;
+      f.style.transformOrigin = 'top left';
+      // IPD horizontal offset: left eye shifts right, right eye shifts left
+      const off = i === 0 ? ipdOff : -ipdOff;
+      f.style.left = off + 'px';
+      f.style.top  = '0px';
+    });
+
+    // Only set src if not already loaded
+    if (!fl.src || fl.src === 'about:blank') fl.src = S.proxyUrl;
+    if (!fr.src || fr.src === 'about:blank') fr.src = S.proxyUrl;
+
+    applyBarrel();
+  });
+}
+
+// Recalculate on resize
+window.addEventListener('resize', () => { if (S.vrMode) setSBSFrames(); });
+
+// ══════════════════════════════════════════════════════
+// VR CONTROLS
+// ══════════════════════════════════════════════════════
 function toggleVR() {
   S.vrMode = document.getElementById('tog-vr').checked;
   const btn = document.getElementById('vr-btn');
@@ -729,11 +641,13 @@ function toggleVR() {
     btn.textContent = '⬡ EXIT VR'; btn.classList.add('glowing');
     dot('d-vr', 'vr');
     if (S.proxyUrl) renderFrames();
-    notify('VR Mode ACTIVE 🥽 — slot your phone in the headset!');
+    notify('VR Mode ACTIVE 🥽');
   } else {
     btn.textContent = '⬡ ENTER VR'; btn.classList.remove('glowing');
     dot('d-vr', '');
-    document.getElementById('split').classList.remove('on');
+    document.getElementById('vr-wrap').classList.remove('on');
+    document.getElementById('fl').src = 'about:blank';
+    document.getElementById('fr').src = 'about:blank';
     if (S.proxyUrl) {
       document.getElementById('sf').style.display = 'block';
       document.getElementById('sf').src = S.proxyUrl;
@@ -742,32 +656,38 @@ function toggleVR() {
   }
 }
 
-// ── SETTINGS ─────────────────────────────────────
+function togglePortrait() {
+  S.portrait = document.getElementById('tog-portrait').checked;
+  const wrap = document.getElementById('vr-wrap');
+  const div  = document.getElementById('vr-divider');
+  if (S.portrait) {
+    wrap.classList.add('portrait');
+    div.style.cssText = 'width:100%;height:5px;background:#000;flex-shrink:0;z-index:5;';
+    wrap.style.flexDirection = 'column';
+  } else {
+    wrap.classList.remove('portrait');
+    div.style.cssText = 'width:6px;height:100%;background:#000;flex-shrink:0;z-index:5;';
+    wrap.style.flexDirection = 'row';
+  }
+  if (S.vrMode) setSBSFrames();
+}
+
 function updateIPD(el) {
   S.ipd = +el.value;
   document.getElementById('ipd-v').textContent = S.ipd + 'mm';
-  if (S.vrMode) applyIPD();
-}
-
-function applyIPD() {
-  const off = (S.ipd - 63) * 0.5;
-  const fl = document.querySelector('.eye-l iframe');
-  const fr = document.querySelector('.eye-r iframe');
-  if (fl) fl.style.marginLeft = -off + 'px';
-  if (fr) fr.style.marginLeft = off + 'px';
+  if (S.vrMode) setSBSFrames();
 }
 
 function updateZoom(el) {
   S.zoom = +el.value;
   document.getElementById('zoom-v').textContent = S.zoom + '%';
+  if (S.vrMode) { setSBSFrames(); return; }
+  const f = document.getElementById('sf');
   const sc = S.zoom / 100;
-  [document.getElementById('fl'), document.getElementById('fr'), document.getElementById('sf')].forEach(f => {
-    if (!f) return;
-    f.style.transform = `scale(${sc})`;
-    f.style.transformOrigin = '0 0';
-    f.style.width = (100 / sc) + '%';
-    f.style.height = (100 / sc) + '%';
-  });
+  f.style.transform = `scale(${sc})`;
+  f.style.transformOrigin = 'top left';
+  f.style.width  = (100/sc) + '%';
+  f.style.height = (100/sc) + '%';
 }
 
 function updateBarrel(el) {
@@ -779,14 +699,14 @@ function updateBarrel(el) {
 function applyBarrel() {
   document.getElementById('dml').setAttribute('scale', S.barrel);
   document.getElementById('dmr').setAttribute('scale', S.barrel);
-  const el = document.querySelector('.eye-l');
-  const er = document.querySelector('.eye-r');
+  const el = document.getElementById('eye-l');
+  const er = document.getElementById('eye-r');
   if (S.barrel > 0 && S.vrMode) {
-    el && (el.style.filter = 'url(#bl)');
-    er && (er.style.filter = 'url(#br)');
+    el.style.filter = 'url(#bl)';
+    er.style.filter = 'url(#br)';
   } else {
-    el && (el.style.filter = '');
-    er && (er.style.filter = '');
+    el.style.filter = '';
+    er.style.filter = '';
   }
 }
 
@@ -795,66 +715,88 @@ function toggleXH() {
   document.getElementById('xh').classList.toggle('on', S.xhair);
 }
 
-// ── NAVIGATION ────────────────────────────────────
-function navBack()  { try { getFrame()?.contentWindow?.history.back(); }    catch {} }
-function navFwd()   { try { getFrame()?.contentWindow?.history.forward(); } catch {} }
-function reload()   { if (S.proxyUrl) renderFrames(); }
+// ══════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════
 function getFrame() { return S.vrMode ? document.getElementById('fl') : document.getElementById('sf'); }
-
-// ── FULLSCREEN ────────────────────────────────────
+function navBack()  { try { getFrame().contentWindow.history.back();    } catch{} }
+function navFwd()   { try { getFrame().contentWindow.history.forward(); } catch{} }
+function doReload() { if (S.proxyUrl) renderFrames(); }
 function requestFS() {
   const el = document.getElementById('mv');
   document.fullscreenElement ? document.exitFullscreen() : (el.requestFullscreen?.() || el.webkitRequestFullscreen?.());
 }
 
-// ════════════════════════════════════════════════
-// GYROSCOPE
-// ════════════════════════════════════════════════
-function setupGyro() { if (window.DeviceOrientationEvent) dot('d-gyro', 'warn'); }
-
+// ══════════════════════════════════════════════════════
+// GYRO
+// ══════════════════════════════════════════════════════
 function toggleGyro() {
   S.gyro = document.getElementById('tog-gyro').checked;
   if (S.gyro) {
     if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
       DeviceOrientationEvent.requestPermission().then(p => {
-        if (p === 'granted') startGyro(); else notify('Gyro permission denied', 'err');
+        if (p === 'granted') startGyro();
+        else { notify('Gyro permission denied','err'); document.getElementById('tog-gyro').checked = false; S.gyro = false; }
       });
-    } else { startGyro(); }
-  } else { stopGyro(); }
+    } else startGyro();
+  } else stopGyro();
+}
+function startGyro() { window.addEventListener('deviceorientation', onGyro); document.getElementById('gyrobar').classList.add('on'); notify('Gyro active 📱'); }
+function stopGyro()  { window.removeEventListener('deviceorientation', onGyro); document.getElementById('gyrobar').classList.remove('on'); }
+function onGyro(e)   { document.getElementById('ga').textContent=Math.round(e.alpha||0)+'°'; document.getElementById('gb').textContent=Math.round(e.beta||0)+'°'; document.getElementById('gc').textContent=Math.round(e.gamma||0)+'°'; }
+
+// ══════════════════════════════════════════════════════
+// GAMEPAD — AUTO-MAPPING
+// ══════════════════════════════════════════════════════
+
+// Standard Gamepad API button labels + auto-mapped default actions
+const BTN_META = [
+  { idx:0,  label:'A / Cross',       defaultAction:'Click Center'    },
+  { idx:1,  label:'B / Circle',      defaultAction:'Navigate Back'   },
+  { idx:2,  label:'X / Square',      defaultAction:'Toggle Crosshair'},
+  { idx:3,  label:'Y / Triangle',    defaultAction:'Toggle VR'       },
+  { idx:4,  label:'LB / L1',         defaultAction:'Scroll Up'       },
+  { idx:5,  label:'RB / R1',         defaultAction:'Scroll Down'     },
+  { idx:6,  label:'LT / L2',         defaultAction:'Zoom Out'        },
+  { idx:7,  label:'RT / R2',         defaultAction:'Zoom In'         },
+  { idx:8,  label:'Select / Share',  defaultAction:'None'            },
+  { idx:9,  label:'Start / Options', defaultAction:'Fullscreen'      },
+  { idx:10, label:'L-Stick Click',   defaultAction:'None'            },
+  { idx:11, label:'R-Stick Click',   defaultAction:'None'            },
+  { idx:12, label:'D-Pad ↑',         defaultAction:'Scroll Up'       },
+  { idx:13, label:'D-Pad ↓',         defaultAction:'Scroll Down'     },
+  { idx:14, label:'D-Pad ←',         defaultAction:'Scroll Left'     },
+  { idx:15, label:'D-Pad →',         defaultAction:'Scroll Right'    },
+];
+
+const BTN_ACTIONS = [
+  'None','Scroll Up','Scroll Down','Scroll Left','Scroll Right',
+  'Zoom In','Zoom Out','Toggle VR','Navigate Back','Navigate Forward',
+  'Reload','Click Center','Toggle Crosshair','Fullscreen',
+];
+
+function autoMapController(gpIndex, buttonCount) {
+  BTN_META.forEach(b => {
+    if (b.idx >= buttonCount) return;
+    const key = gpIndex + '_' + b.idx;
+    // Only auto-map if not already mapped by user
+    if (!S.mappings[key]) S.mappings[key] = b.defaultAction;
+  });
 }
 
-function startGyro() {
-  window.addEventListener('deviceorientation', onGyro);
-  document.getElementById('gyrobar').classList.add('on');
-  dot('d-gyro', 'ok');
-  notify('Gyroscope active — tilt your device!');
-}
-function stopGyro() {
-  window.removeEventListener('deviceorientation', onGyro);
-  document.getElementById('gyrobar').classList.remove('on');
-  dot('d-gyro', '');
-}
-function onGyro(e) {
-  document.getElementById('ga').textContent = Math.round(e.alpha||0) + '°';
-  document.getElementById('gb').textContent = Math.round(e.beta||0) + '°';
-  document.getElementById('gc').textContent = Math.round(e.gamma||0) + '°';
-}
-
-// ════════════════════════════════════════════════
-// GAMEPAD
-// ════════════════════════════════════════════════
 function setupGamepad() {
   window.addEventListener('gamepadconnected', e => {
     S.controllers[e.gamepad.index] = e.gamepad;
+    autoMapController(e.gamepad.index, e.gamepad.buttons.length);
     updateCtrlUI();
     dot('d-ctrl', 'ok');
-    notify('🎮 Controller: ' + e.gamepad.id.substring(0, 40));
+    notify('🎮 Auto-mapped: ' + e.gamepad.id.substring(0,36));
     if (!S.pollId) startPoll();
   });
   window.addEventListener('gamepaddisconnected', e => {
     delete S.controllers[e.gamepad.index];
     updateCtrlUI();
-    if (!Object.keys(S.controllers).length) { dot('d-ctrl', ''); stopPoll(); }
+    if (!Object.keys(S.controllers).length) { dot('d-ctrl',''); stopPoll(); }
     notify('Controller disconnected');
   });
 }
@@ -868,14 +810,14 @@ function startPoll() {
       S.controllers[i] = gp;
       if (!prevBtns[i]) prevBtns[i] = new Array(gp.buttons.length).fill(false);
       gp.buttons.forEach((btn, j) => {
-        if (btn.pressed && !prevBtns[i][j]) execAction(S.mappings[i+'_'+j] || 'None', gp);
+        if (btn.pressed && !prevBtns[i][j]) execAction(S.mappings[i+'_'+j] || 'None');
         prevBtns[i][j] = btn.pressed;
       });
       // Left stick scroll
-      const lx = gp.axes[0]||0, ly = gp.axes[1]||0, DZ = 0.15, SP = 9;
+      const lx = gp.axes[0]||0, ly = gp.axes[1]||0, DZ=0.15, SP=10;
       const f = getFrame();
       if (f && (Math.abs(lx)>DZ || Math.abs(ly)>DZ)) {
-        try { f.contentWindow?.scrollBy(lx*SP, ly*SP); } catch {}
+        try { f.contentWindow?.scrollBy(lx*SP, ly*SP); } catch{}
       }
     }
     updateCtrlDisplay();
@@ -886,30 +828,23 @@ function startPoll() {
 
 function stopPoll() { if (S.pollId) { cancelAnimationFrame(S.pollId); S.pollId = null; } }
 
-function execAction(action, gp) {
+function execAction(action) {
   const f = getFrame();
   switch(action) {
-    case 'Scroll Up':    try { f?.contentWindow?.scrollBy(0,-200); } catch {} break;
-    case 'Scroll Down':  try { f?.contentWindow?.scrollBy(0,200);  } catch {} break;
-    case 'Scroll Left':  try { f?.contentWindow?.scrollBy(-200,0); } catch {} break;
-    case 'Scroll Right': try { f?.contentWindow?.scrollBy(200,0);  } catch {} break;
-    case 'Zoom In':
-      document.getElementById('zoom').value = Math.min(200, S.zoom+10);
-      updateZoom(document.getElementById('zoom')); break;
-    case 'Zoom Out':
-      document.getElementById('zoom').value = Math.max(50, S.zoom-10);
-      updateZoom(document.getElementById('zoom')); break;
-    case 'Toggle VR':     document.getElementById('tog-vr').click(); break;
-    case 'Navigate Back': navBack(); break;
-    case 'Navigate Forward': navFwd(); break;
-    case 'Reload':        reload(); break;
-    case 'Toggle Crosshair': document.getElementById('tog-xh').click(); break;
-    case 'Fullscreen':    requestFS(); break;
+    case 'Scroll Up':          try{f?.contentWindow?.scrollBy(0,-200);}catch{} break;
+    case 'Scroll Down':        try{f?.contentWindow?.scrollBy(0,200);}catch{} break;
+    case 'Scroll Left':        try{f?.contentWindow?.scrollBy(-200,0);}catch{} break;
+    case 'Scroll Right':       try{f?.contentWindow?.scrollBy(200,0);}catch{} break;
+    case 'Zoom In':            document.getElementById('zoom').value=Math.min(200,S.zoom+10); updateZoom(document.getElementById('zoom')); break;
+    case 'Zoom Out':           document.getElementById('zoom').value=Math.max(50,S.zoom-10);  updateZoom(document.getElementById('zoom')); break;
+    case 'Toggle VR':          document.getElementById('tog-vr').click(); break;
+    case 'Navigate Back':      navBack(); break;
+    case 'Navigate Forward':   navFwd(); break;
+    case 'Reload':             doReload(); break;
+    case 'Toggle Crosshair':   document.getElementById('tog-xh').click(); break;
+    case 'Fullscreen':         requestFS(); break;
     case 'Click Center':
-      if (f) try {
-        const doc = f.contentWindow?.document;
-        doc?.elementFromPoint(f.clientWidth/2, f.clientHeight/2)?.click();
-      } catch {} break;
+      if (f) try { const doc=f.contentWindow?.document; doc?.elementFromPoint(f.clientWidth/2,f.clientHeight/2)?.click(); } catch{} break;
   }
 }
 
@@ -918,117 +853,125 @@ function updateCtrlUI() {
   const ma = document.getElementById('map-area');
   const keys = Object.keys(S.controllers);
   if (!keys.length) {
-    ca.innerHTML = `<div id="noctrl"><div style="font-size:1.8rem;opacity:.25;margin-bottom:6px">🎮</div><div>No controller detected</div><div style="margin-top:5px;font-size:.62rem;opacity:.55">Press any button on your gamepad</div></div>`;
-    ma.innerHTML = `<div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--dim);text-align:center;padding:8px 0">Connect a controller first</div>`;
+    ca.innerHTML = `<div id="noctrl"><div style="font-size:1.6rem;opacity:.22;margin-bottom:5px">🎮</div><div>No controller detected</div><div style="margin-top:4px;font-size:.6rem;opacity:.5">Press any button on your gamepad</div></div>`;
+    ma.innerHTML = `<div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--dim);text-align:center;padding:6px 0">Connect a controller first</div>`;
     return;
   }
   ca.innerHTML = ''; ma.innerHTML = '';
-
   keys.forEach(idx => {
     const gp = S.controllers[idx]; if (!gp) return;
-    const sid = gp.id.length > 28 ? gp.id.substring(0,26)+'…' : gp.id;
+    const sid = gp.id.length>30 ? gp.id.substring(0,28)+'…' : gp.id;
+    // Controller display box
     const box = document.createElement('div');
     box.className = 'ctrl-box';
-    box.innerHTML = `<div class="ctrl-name">#${gp.index} ${sid}</div><div class="ctrl-grid" id="cbg-${idx}"></div><div id="cax-${idx}" style="margin-top:7px;font-size:.65rem;color:var(--dim)"></div>`;
+    box.innerHTML = `<div class="ctrl-name">#${gp.index} ${sid}</div><div class="ctrl-btns" id="cbg-${idx}"></div><div class="axes-row" id="cax-${idx}"></div>`;
     ca.appendChild(box);
-
-    // Mapping
+    // Mapping panel — all buttons
     const mapDiv = document.createElement('div');
-    mapDiv.innerHTML = `<div style="font-size:.68rem;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:7px">Controller #${gp.index}</div>`;
-    const COMMON_BTNS = [
-      {i:0,l:'A / Cross'},{i:1,l:'B / Circle'},{i:2,l:'X / Square'},{i:3,l:'Y / Triangle'},
-      {i:4,l:'LB / L1'},{i:5,l:'RB / R1'},{i:6,l:'LT / L2'},{i:7,l:'RT / R2'},
-      {i:8,l:'Select'},{i:9,l:'Start'},{i:12,l:'D-Pad ↑'},{i:13,l:'D-Pad ↓'},
-      {i:14,l:'D-Pad ←'},{i:15,l:'D-Pad →'},
-    ];
-    COMMON_BTNS.forEach(b => {
-      if (b.i >= gp.buttons.length) return;
-      const key = idx+'_'+b.i;
+    mapDiv.innerHTML = `<div style="font-size:.65rem;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:6px">Controller #${gp.index} — ${gp.buttons.length} buttons</div>`;
+    for (let i = 0; i < gp.buttons.length; i++) {
+      const key = idx + '_' + i;
       if (!S.mappings[key]) S.mappings[key] = 'None';
+      const meta = BTN_META.find(b => b.idx === i);
+      const label = meta ? meta.label : `Button ${i}`;
       const row = document.createElement('div');
       row.className = 'mrow';
-      row.innerHTML = `<span class="mlabel">BTN ${b.i}</span>
+      row.innerHTML = `<span class="mlabel" title="B${i}">${label}</span>
         <select onchange="S.mappings['${key}']=this.value">
           ${BTN_ACTIONS.map(a=>`<option value="${a}"${S.mappings[key]===a?' selected':''}>${a}</option>`).join('')}
         </select>`;
       mapDiv.appendChild(row);
-    });
+    }
     ma.appendChild(mapDiv);
   });
 }
 
-let lastDisp = 0;
+let _lastDisp = 0;
 function updateCtrlDisplay() {
-  const now = Date.now();
-  if (now - lastDisp < 60) return;
-  lastDisp = now;
+  const now = Date.now(); if (now-_lastDisp<80) return; _lastDisp=now;
   const gps = navigator.getGamepads?.() || [];
-  for (let i = 0; i < gps.length; i++) {
-    const gp = gps[i]; if (!gp) continue;
-    const bg = document.getElementById('cbg-'+i);
-    const ax = document.getElementById('cax-'+i);
-    if (!bg || !ax) continue;
-    bg.innerHTML = '';
-    gp.buttons.forEach((b, j) => {
-      const d = document.createElement('div');
-      d.className = 'cbtn' + (b.pressed ? ' on' : '');
-      d.textContent = 'B'+j+(b.pressed?' ●':' ○');
+  for (let i=0;i<gps.length;i++) {
+    const gp=gps[i]; if (!gp) continue;
+    const bg=document.getElementById('cbg-'+i);
+    const ax=document.getElementById('cax-'+i);
+    if (!bg||!ax) continue;
+    bg.innerHTML='';
+    gp.buttons.forEach((b,j)=>{
+      const d=document.createElement('span');
+      d.className='cbtn'+(b.pressed?' on':'');
+      d.textContent='B'+j;
       bg.appendChild(d);
     });
-    ax.innerHTML = '';
-    for (let j = 0; j < gp.axes.length; j += 2) {
-      const x = (gp.axes[j]||0).toFixed(2);
-      const y = (gp.axes[j+1]||0).toFixed(2);
-      ax.innerHTML += `<div>Axis ${j}/${j+1}: X=${x} Y=${y}</div>`;
-    }
+    const axParts=[];
+    for (let j=0;j<gp.axes.length;j+=2) axParts.push(`S${j/2|0}:(${(gp.axes[j]||0).toFixed(1)},${(gp.axes[j+1]||0).toFixed(1)})`);
+    ax.textContent=axParts.join('  ');
   }
 }
 
-// ════════════════════════════════════════════════
-// LOADING / NOTIF / DOT
-// ════════════════════════════════════════════════
-function showLoading(msg) {
-  document.getElementById('loading').classList.add('on');
-  document.getElementById('load-msg').textContent = msg || 'LOADING...';
+// ══════════════════════════════════════════════════════
+// MOBILE MENU
+// ══════════════════════════════════════════════════════
+function toggleMenu() {
+  S.menuOpen = !S.menuOpen;
+  document.getElementById('sb').classList.toggle('open', S.menuOpen);
+  document.getElementById('sb-overlay').classList.toggle('on', S.menuOpen);
+  document.getElementById('menu-toggle').textContent = S.menuOpen ? '✕' : '☰';
 }
-function setLoadMsg(msg) { document.getElementById('load-msg').textContent = msg; }
-function hideLoading() { document.getElementById('loading').classList.remove('on'); }
+function closeMobileMenu() {
+  S.menuOpen = false;
+  document.getElementById('sb').classList.remove('open');
+  document.getElementById('sb-overlay').classList.remove('on');
+  document.getElementById('menu-toggle').textContent = '☰';
+}
 
+// ══════════════════════════════════════════════════════
+// LOADING / NOTIF / DOT
+// ══════════════════════════════════════════════════════
+function showLoading(m) { document.getElementById('loading').classList.add('on'); document.getElementById('load-msg').textContent=m||'LOADING...'; }
+function hideLoading()  { document.getElementById('loading').classList.remove('on'); }
 let _nt;
 function notify(msg, type) {
-  const el = document.getElementById('notif');
-  el.textContent = msg;
-  el.className = 'on' + (type === 'err' ? ' err' : type === 'warn' ? ' warn' : '');
-  clearTimeout(_nt);
-  _nt = setTimeout(() => el.classList.remove('on'), 3500);
+  const el=document.getElementById('notif');
+  el.textContent=msg;
+  el.className='on'+(type?' '+type:'');
+  clearTimeout(_nt); _nt=setTimeout(()=>el.classList.remove('on'),3500);
 }
+function dot(id,cls) { const d=document.getElementById(id); if(d) d.className='dot'+(cls?' '+cls:''); }
 
-function dot(id, cls) {
-  const d = document.getElementById(id);
-  if (!d) return;
-  d.className = 'dot' + (cls ? ' '+cls : '');
-}
-
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // KEYBOARD
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 document.addEventListener('keydown', e => {
   if (['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
-  switch(e.key) {
-    case 'v': case 'V': document.getElementById('tog-vr').click(); break;
-    case 'f': case 'F': requestFS(); break;
-    case 'r': case 'R': reload(); break;
-    case 'c': case 'C': document.getElementById('tog-xh').click(); break;
-    case 'ArrowUp':   try { getFrame()?.contentWindow?.scrollBy(0,-120); } catch {} break;
-    case 'ArrowDown': try { getFrame()?.contentWindow?.scrollBy(0,120);  } catch {} break;
-    case 'Enter': if (document.activeElement?.id === 'url-in') loadSite(); break;
-    case 'Escape': document.exitFullscreen?.(); break;
-  }
+  if (e.key==='v'||e.key==='V') document.getElementById('tog-vr').click();
+  else if (e.key==='f'||e.key==='F') requestFS();
+  else if (e.key==='r'||e.key==='R') doReload();
+  else if (e.key==='c'||e.key==='C') document.getElementById('tog-xh').click();
+  else if (e.key==='m'||e.key==='M') toggleMenu();
+  else if (e.key==='ArrowUp')   try{getFrame().contentWindow.scrollBy(0,-120);}catch{}
+  else if (e.key==='ArrowDown') try{getFrame().contentWindow.scrollBy(0,120);}catch{}
+  else if (e.key==='Enter' && document.activeElement?.id==='url-in') loadSite();
+  else if (e.key==='Escape') { document.exitFullscreen?.(); closeMobileMenu(); }
 });
 
-// ════════════════════════════════════════════════
-// GO
-// ════════════════════════════════════════════════
+// Sidebar closes via the dim overlay (see #sb-overlay onclick)
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+function init() {
+  buildPresets();
+  renderProxyList();
+  setupGamepad();
+  document.getElementById('cf-in').value = S.cfWorker;
+  // Auto-detect portrait on mobile
+  if (window.innerWidth < window.innerHeight) {
+    document.getElementById('tog-portrait').checked = true;
+    togglePortrait();
+  }
+  notify('VOID VR ready — translate.goog + CF Worker routing 🔥');
+}
+
 init();
 </script>
 </body>
