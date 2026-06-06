@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>VOID VR</title>
+<title>TNAP 2.0</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
 :root {
@@ -209,6 +209,65 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 
 /* no ctrl */
 #noctrl{text-align:center;color:var(--dim);font-size:.72rem;padding:14px;font-family:'Share Tech Mono',monospace;}
+
+/* ══ VIRTUAL CURSOR ══ */
+#vcursor {
+  position: absolute;
+  width: 22px; height: 22px;
+  pointer-events: none;
+  z-index: 9000;
+  display: none;
+  transform: translate(-50%, -50%);
+  transition: opacity .15s;
+}
+#vcursor.on { display: block; }
+#vcursor svg { width: 100%; height: 100%; filter: drop-shadow(0 0 4px rgba(0,255,225,.8)); }
+
+/* VR mode: duplicate cursor for each eye */
+#vcursor-r {
+  position: absolute;
+  width: 22px; height: 22px;
+  pointer-events: none;
+  z-index: 9000;
+  display: none;
+  transform: translate(-50%, -50%);
+}
+#vcursor-r.on { display: block; }
+#vcursor-r svg { width: 100%; height: 100%; filter: drop-shadow(0 0 4px rgba(255,0,170,.8)); }
+
+/* cursor click flash */
+@keyframes cursorClick {
+  0%   { transform: translate(-50%,-50%) scale(1); }
+  50%  { transform: translate(-50%,-50%) scale(1.8); opacity:.4; }
+  100% { transform: translate(-50%,-50%) scale(1); }
+}
+#vcursor.click, #vcursor-r.click { animation: cursorClick .18s ease; }
+
+/* game mode indicator */
+#game-indicator {
+  position: absolute;
+  top: 8px; left: 8px;
+  background: rgba(0,0,0,.75);
+  border: 1px solid var(--neon3);
+  color: var(--neon3);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .62rem;
+  padding: 3px 9px;
+  border-radius: 4px;
+  z-index: 9001;
+  display: none;
+  letter-spacing: .08em;
+}
+#game-indicator.on { display: block; }
+
+/* cursor mode badge in HUD */
+.cursor-mode-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .58rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: 2px;
+}
 </style>
 </head>
 <body>
@@ -261,11 +320,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   <div class="pnl">
     <div class="pnl-title">Proxy Chain</div>
     <div id="proxy-list"></div>
-    <div class="row" style="margin-top:7px">
-      <input type="url" id="cf-in" placeholder="https://pohh.tflanigan.workers.dev" style="margin:0;font-size:.68rem"/>
-      <button class="btn" style="font-size:.72rem" onclick="setCF()">SET</button>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--dim);margin:5px 0 3px;line-height:1.5">
+      Toggle each layer. Active ones apply left→right. Drag to reorder.
     </div>
-    <button class="btn full" style="margin-top:6px;font-size:.72rem" onclick="testAll()">⟳ TEST PROXIES</button>
+    <div class="row" style="margin-top:6px">
+      <input type="url" id="cf-in" placeholder="https://pohh.tflanigan.workers.dev" style="margin:0;font-size:.65rem"/>
+      <button class="btn" style="font-size:.7rem" onclick="setCF()">SET</button>
+    </div>
+    <button class="btn full" style="margin-top:6px;font-size:.7rem" onclick="testAll()">⟳ TEST ALL</button>
   </div>
 
   <!-- PRESETS -->
@@ -314,6 +376,31 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <span class="slabel">GYROSCOPE</span>
       <label class="tog"><input type="checkbox" id="tog-gyro" onchange="toggleGyro()"><span class="tsl"></span></label>
     </div>
+    <div class="srow">
+      <span class="slabel">CURSOR MODE</span>
+      <label class="tog"><input type="checkbox" id="tog-cursor" onchange="toggleCursorMode()"><span class="tsl"></span></label>
+    </div>
+    <div class="srow" id="cursor-speed-row" style="display:none">
+      <span class="slabel">CURSOR SPEED</span>
+      <div class="swrap">
+        <input type="range" id="cursor-speed" min="1" max="20" value="8" oninput="S.cursorSpeed=+this.value;document.getElementById('cs-v').textContent=this.value">
+        <span class="vdisp" id="cs-v">8</span>
+      </div>
+    </div>
+    <div class="srow" id="cursor-scroll-row" style="display:none">
+      <span class="slabel">SCROLL SPEED</span>
+      <div class="swrap">
+        <input type="range" id="scroll-speed" min="1" max="30" value="10" oninput="S.scrollSpeed=+this.value;document.getElementById('ss-v').textContent=this.value">
+        <span class="vdisp" id="ss-v">10</span>
+      </div>
+    </div>
+    <div id="cursor-info" style="display:none;font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--dim);margin-bottom:8px;line-height:1.6;background:rgba(0,255,225,.04);border:1px solid var(--border);border-radius:4px;padding:6px 8px">
+      <b style="color:var(--neon)">L-STICK</b> = scroll page<br>
+      <b style="color:var(--neon)">R-STICK</b> = move cursor<br>
+      <b style="color:var(--neon)">A</b> = click / follow link<br>
+      <b style="color:var(--neon)">R3 (click)</b> = toggle game mode<br>
+      <b style="color:var(--neon3)">Game mode</b> = pass-through (no cursor)
+    </div>
     <div style="display:flex;gap:6px;margin-top:5px">
       <button class="btn" id="vr-btn" onclick="document.getElementById('tog-vr').click()" style="flex:1">⬡ ENTER VR</button>
       <button class="btn" onclick="requestFS()" style="padding:7px 9px">⛶</button>
@@ -347,7 +434,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 
   <div id="ph">
     <div class="ph-icon">🥽</div>
-    <div class="ph-txt">// LOAD ANY SITE //<br>TRANSLATE + PROXY ROUTING ACTIVE</div>
+    <div class="ph-txt">// LOAD ANY SITE //<br>PROXY KILL SWITCHES ACTIVE</div>
   </div>
 
   <!-- HUD -->
@@ -360,6 +447,23 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     <button class="hbtn" onclick="openExternal()">↗</button>
   </div>
 
+
+  <!-- VIRTUAL CURSOR (left eye / single) -->
+  <div id="vcursor">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 2L4 18L8.5 13.5L11.5 20L13.5 19L10.5 12.5L16 12.5L4 2Z"
+            fill="rgba(0,255,225,0.9)" stroke="rgba(0,0,0,0.5)" stroke-width="0.5"/>
+    </svg>
+  </div>
+  <!-- VR right-eye cursor -->
+  <div id="vcursor-r">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 2L4 18L8.5 13.5L11.5 20L13.5 19L10.5 12.5L16 12.5L4 2Z"
+            fill="rgba(255,0,170,0.9)" stroke="rgba(0,0,0,0.5)" stroke-width="0.5"/>
+    </svg>
+  </div>
+  <!-- GAME MODE indicator -->
+  <div id="game-indicator">🎮 GAME MODE — BROWSE MODE OFF</div>
   <!-- crosshair -->
   <div id="xh"><div class="xh-h"></div><div class="xh-v"></div></div>
 
@@ -419,83 +523,151 @@ const S = {
   controllers: {},
   mappings: {},   // key: "gpIdx_btnIdx" → action string
   pollId: null,
-  cfWorker: localStorage.getItem('cf_worker') || 'https://pohh.tflanigan.workers.dev',
+  cfWorker: localStorage.getItem('cf_worker') || 'https://pohh.tflanigan.workers.dev', // also used by PROXIES[cf]
   menuOpen: false,
+  cursorMode: false,
+  cursorSpeed: 8,
+  scrollSpeed: 10,
 };
 
 // ══════════════════════════════════════════════════════
-// URL → translate.goog → CF Worker
+// PROXY LAYER DEFINITIONS + KILL SWITCHES
+// Each proxy wraps the URL produced by the previous one.
+// Toggle any layer on/off independently. State persists.
 // ══════════════════════════════════════════════════════
-function toTranslate(rawUrl) {
-  // Convert https://store.steampowered.com/path
-  // → https://store-steampowered-com.translate.goog/path?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=en&_x_tr_pto=wapp
-  let u;
-  try { u = new URL(rawUrl); } catch { return null; }
-  const hostDashed = u.hostname.replace(/\./g, '-');
-  const params = new URLSearchParams({
-    _x_tr_sl: 'auto',
-    _x_tr_tl: 'en',
-    _x_tr_hl: 'en',
-    _x_tr_pto: 'wapp',
-  });
-  // Preserve existing query params
-  u.searchParams.forEach((v,k) => params.set(k,v));
-  return `https://${hostDashed}.translate.goog${u.pathname}?${params.toString()}`;
-}
 
-function throughCF(translatedUrl) {
-  if (!S.cfWorker) return translatedUrl;
-  return S.cfWorker.replace(/\/$/, '') + '/?url=' + encodeURIComponent(translatedUrl);
-}
+const loadEn = (id, def) => localStorage.getItem('px_'+id) !== null ? localStorage.getItem('px_'+id)==='1' : def;
+const saveEn = (id, v)   => localStorage.setItem('px_'+id, v ? '1' : '0');
 
-function buildProxyUrl(rawUrl) {
-  const t = toTranslate(rawUrl);
-  if (!t) return rawUrl;
-  return throughCF(t);
-}
-
-// ══════════════════════════════════════════════════════
-// PROXY CHAIN UI (now just shows translate + CF)
-// ══════════════════════════════════════════════════════
-const PROXY_DEFS = () => [
-  { id:'translate', label:'GOOGLE TRANSLATE', name:'*.translate.goog', status:'ok' },
-  { id:'cf',        label:'CF WORKER',        name: S.cfWorker ? new URL(S.cfWorker).hostname : 'not set', status: S.cfWorker ? 'ok' : 'warn' },
+const PROXIES = [
+  {
+    id:'translate', label:'GOOGLE TRANSLATE', host:'*.translate.goog',
+    enabled: loadEn('translate', true), status:'unknown',
+    wrap(url) {
+      let u; try { u = new URL(url); } catch { return url; }
+      const h = u.hostname.replace(/\./g,'-');
+      const p = new URLSearchParams({_x_tr_sl:'auto',_x_tr_tl:'en',_x_tr_hl:'en',_x_tr_pto:'wapp'});
+      u.searchParams.forEach((v,k) => p.set(k,v));
+      return `https://${h}.translate.goog${u.pathname}?${p.toString()}`;
+    },
+    async test() {
+      try { await fetch('https://www-example-com.translate.goog/?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=en',{mode:'no-cors'}); return 'ok'; }
+      catch { return 'dead'; }
+    }
+  },
+  {
+    id:'cf', label:'CF WORKER', get host(){ return S.cfWorker ? new URL(S.cfWorker).hostname : 'not set'; },
+    enabled: loadEn('cf', true), status:'unknown',
+    wrap(url) { return S.cfWorker ? S.cfWorker.replace(/\/$/,'')+'/?url='+encodeURIComponent(url) : url; },
+    async test() {
+      if (!S.cfWorker) return 'warn';
+      try {
+        const r = await fetch(S.cfWorker.replace(/\/$/,'')+'/?url='+encodeURIComponent('https://example.com'),
+          {mode:'cors', signal:AbortSignal.timeout(5000)});
+        return r.ok ? 'ok' : 'dead';
+      } catch { return 'dead'; }
+    }
+  },
+  {
+    id:'allorigins', label:'ALL ORIGINS', host:'api.allorigins.win',
+    enabled: loadEn('allorigins', false), status:'unknown',
+    wrap(url) { return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`; },
+    async test() {
+      try { const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent('https://example.com')}`,{signal:AbortSignal.timeout(5000)}); return r.ok?'ok':'dead'; }
+      catch { return 'dead'; }
+    }
+  },
+  {
+    id:'corsproxy', label:'CORSPROXY.IO', host:'corsproxy.io',
+    enabled: loadEn('corsproxy', false), status:'unknown',
+    wrap(url) { return `https://corsproxy.io/?url=${encodeURIComponent(url)}`; },
+    async test() {
+      try { const r=await fetch(`https://corsproxy.io/?url=${encodeURIComponent('https://example.com')}`,{signal:AbortSignal.timeout(5000)}); return r.ok?'ok':'dead'; }
+      catch { return 'dead'; }
+    }
+  },
+  {
+    id:'corssh', label:'CORS.SH', host:'proxy.cors.sh',
+    enabled: loadEn('corssh', false), status:'unknown',
+    wrap(url) { return `https://proxy.cors.sh/${url}`; },
+    async test() {
+      try { const r=await fetch('https://proxy.cors.sh/https://example.com',{signal:AbortSignal.timeout(5000)}); return r.ok?'ok':'dead'; }
+      catch { return 'dead'; }
+    }
+  },
+  {
+    id:'thingproxy', label:'THINGPROXY', host:'thingproxy.freeboard.io',
+    enabled: loadEn('thingproxy', false), status:'unknown',
+    wrap(url) { return `https://thingproxy.freeboard.io/fetch/${url}`; },
+    async test() {
+      try { const r=await fetch('https://thingproxy.freeboard.io/fetch/https://example.com',{signal:AbortSignal.timeout(5000)}); return r.ok?'ok':'dead'; }
+      catch { return 'dead'; }
+    }
+  },
 ];
 
+// Chain all enabled proxies left→right
+function buildProxyUrl(rawUrl) {
+  let url = rawUrl;
+  for (const p of PROXIES) { if (p.enabled) url = p.wrap(url); }
+  return url;
+}
+
+// ── Proxy list UI ─────────────────────────────────────
 function renderProxyList() {
   const el = document.getElementById('proxy-list');
   el.innerHTML = '';
-  PROXY_DEFS().forEach(p => {
-    const d = document.createElement('div');
-    d.className = 'pbadge ' + (p.status === 'ok' ? 'active' : p.status === 'warn' ? 'testing' : 'dead');
-    d.innerHTML = `<span class="dot ${p.status === 'ok' ? 'ok' : p.status === 'warn' ? 'warn' : 'err'}"></span><span style="flex:1">${p.label}</span><span style="opacity:.5;font-size:.58rem;overflow:hidden;text-overflow:ellipsis">${p.name}</span>`;
-    el.appendChild(d);
+  PROXIES.forEach(p => {
+    const sc = p.status==='ok'?'ok':p.status==='dead'?'err':p.status==='warn'?'warn':'';
+    const bc = p.status==='ok'?'active':p.status==='dead'?'dead':p.status==='warn'||p.status==='testing'?'testing':'';
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:7px;margin-bottom:6px;';
+    row.innerHTML = `
+      <label class="tog" title="Kill switch: ${p.label}" style="flex-shrink:0">
+        <input type="checkbox" ${p.enabled?'checked':''} onchange="toggleProxy('${p.id}',this.checked)">
+        <span class="tsl"></span>
+      </label>
+      <div class="pbadge ${bc}" style="flex:1;margin:0;min-width:0">
+        <span class="dot ${sc}" style="flex-shrink:0"></span>
+        <span style="flex:1;font-size:.62rem;white-space:nowrap">${p.label}</span>
+        <span id="ps-${p.id}" style="opacity:.4;font-size:.55rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px">${p.host}</span>
+      </div>`;
+    el.appendChild(row);
   });
-  dot('d-proxy', S.cfWorker ? 'ok' : 'warn');
+  const anyOn = PROXIES.some(p=>p.enabled);
+  dot('d-proxy', anyOn?'ok':'err');
+}
+
+function toggleProxy(id, val) {
+  const p = PROXIES.find(x=>x.id===id);
+  if (!p) return;
+  p.enabled = val;
+  saveEn(id, val);
+  renderProxyList();
+  const chain = PROXIES.filter(x=>x.enabled).map(x=>x.label).join(' → ') || 'NONE (direct)';
+  notify((val?'✓ ON':'✗ OFF')+': '+p.label+'\nChain: '+chain);
 }
 
 async function testAll() {
-  notify('Testing translate.goog...');
-  try {
-    const testUrl = toTranslate('https://example.com');
-    const r = await fetch(testUrl, { mode: 'no-cors' });
-    notify('✓ translate.goog reachable');
-    dot('d-proxy', 'ok');
-  } catch {
-    notify('translate.goog unreachable — check connection', 'warn');
+  notify('Testing all proxies...');
+  for (const p of PROXIES) {
+    p.status = 'testing';
+    renderProxyList();
+    p.status = await p.test();
+    renderProxyList();
   }
-  renderProxyList();
+  const ok = PROXIES.filter(p=>p.status==='ok').length;
+  notify(`Done — ${ok}/${PROXIES.length} reachable`);
 }
 
 function setCF() {
-  const v = document.getElementById('cf-in').value.trim().replace(/\/$/, '');
+  const v = document.getElementById('cf-in').value.trim().replace(/\/$/,'');
   if (!v) return;
   S.cfWorker = v;
   localStorage.setItem('cf_worker', v);
   renderProxyList();
-  notify('CF Worker updated: ' + v);
+  notify('CF Worker set: '+v);
 }
-
 // ══════════════════════════════════════════════════════
 // PRESETS
 // ══════════════════════════════════════════════════════
@@ -533,7 +705,8 @@ function loadSite() {
   S.url = url;
   S.proxyUrl = buildProxyUrl(url);
 
-  showLoading('ROUTING: translate → CF Worker...');
+  const activeChain = PROXIES.filter(p=>p.enabled).map(p=>p.label).join(' → ') || 'DIRECT';
+  showLoading('ROUTING: ' + activeChain + '...');
   dot('d-site', 'warn');
 
   document.getElementById('ph').style.display = 'none';
@@ -749,9 +922,167 @@ function onGyro(e)   { document.getElementById('ga').textContent=Math.round(e.al
 // GAMEPAD — AUTO-MAPPING
 // ══════════════════════════════════════════════════════
 
+// ══════════════════════════════════════════════════════
+// VIRTUAL CURSOR STATE
+// ══════════════════════════════════════════════════════
+// cursorX/Y are 0..1 normalized within each eye's viewport
+const CUR = {
+  x: 0.5, y: 0.5,   // cursor position (normalized 0-1)
+  gameMode: false,   // true = pass-through, no cursor
+  modeAutoDetected: false,
+};
+
+function toggleCursorMode() {
+  S.cursorMode = document.getElementById('tog-cursor').checked;
+  document.getElementById('cursor-speed-row').style.display = S.cursorMode ? '' : 'none';
+  document.getElementById('cursor-scroll-row').style.display = S.cursorMode ? '' : 'none';
+  document.getElementById('cursor-info').style.display = S.cursorMode ? '' : 'none';
+  const cur = document.getElementById('vcursor');
+  const curR = document.getElementById('vcursor-r');
+  if (S.cursorMode) {
+    cur.classList.add('on');
+    if (S.vrMode) curR.classList.add('on');
+    notify('🕹️ Cursor mode ON — R-stick = cursor, L-stick = scroll, A = click');
+  } else {
+    cur.classList.remove('on');
+    curR.classList.remove('on');
+    notify('Cursor mode OFF');
+  }
+}
+
+function setGameMode(on, reason) {
+  CUR.gameMode = on;
+  const ind = document.getElementById('game-indicator');
+  if (on) {
+    ind.textContent = '🎮 GAME MODE — ' + (reason || 'BROWSE OFF');
+    ind.classList.add('on');
+    // Hide cursor in game mode
+    document.getElementById('vcursor').classList.remove('on');
+    document.getElementById('vcursor-r').classList.remove('on');
+    notify('🎮 Game Mode ON — controller passed through. R3 to exit.', 'warn');
+  } else {
+    ind.classList.remove('on');
+    if (S.cursorMode) {
+      document.getElementById('vcursor').classList.add('on');
+      if (S.vrMode) document.getElementById('vcursor-r').classList.add('on');
+    }
+    notify('🌐 Browse Mode ON — cursor & scroll active');
+  }
+}
+
+// Heuristic: detect if the active page looks like a game
+// Checks for canvas fullscreen, pointer lock, gamepad consumption patterns
+function detectGameMode(gp) {
+  if (!S.cursorMode) return;
+  try {
+    const f = getFrame();
+    if (!f) return;
+    const doc = f.contentWindow?.document;
+    if (!doc) return;
+
+    // Signs it's a game:
+    // 1. A fullscreen <canvas> exists
+    const canvases = doc.querySelectorAll('canvas');
+    let hasFullCanvas = false;
+    canvases.forEach(c => {
+      const r = c.getBoundingClientRect();
+      if (r.width > f.clientWidth * 0.7 && r.height > f.clientHeight * 0.7) hasFullCanvas = true;
+    });
+
+    // 2. Pointer lock is active
+    const pointerLocked = !!doc.pointerLockElement;
+
+    // 3. Page title contains game keywords
+    const title = (doc.title || '').toLowerCase();
+    const gameKeywords = ['game','play','level','score','lives','health','fps','pvp','rpg','mmo','minecraft','roblox','fortnite','chess'];
+    const titleMatch = gameKeywords.some(k => title.includes(k));
+
+    const isGame = pointerLocked || hasFullCanvas || titleMatch;
+
+    if (isGame && !CUR.gameMode) {
+      CUR.modeAutoDetected = true;
+      setGameMode(true, 'AUTO-DETECTED');
+    } else if (!isGame && CUR.gameMode && CUR.modeAutoDetected) {
+      CUR.modeAutoDetected = false;
+      setGameMode(false);
+    }
+  } catch {}
+}
+
+// Move the virtual cursor overlay element
+function updateCursorPos() {
+  const mv = document.getElementById('mv');
+  const cur = document.getElementById('vcursor');
+  const curR = document.getElementById('vcursor-r');
+
+  if (S.vrMode) {
+    // In VR mode: cursor lives inside each eye half
+    const wrap = document.getElementById('vr-wrap');
+    const isPortrait = S.portrait;
+    const divSize = 6;
+    let eyeW, eyeH, eyeOffX, eyeOffY;
+    if (isPortrait) {
+      eyeW = wrap.clientWidth;
+      eyeH = (wrap.clientHeight - divSize) / 2;
+      eyeOffX = 0; eyeOffY = 0;
+    } else {
+      eyeW = (wrap.clientWidth - divSize) / 2;
+      eyeH = wrap.clientHeight;
+      eyeOffX = 0; eyeOffY = 0;
+    }
+    // Left eye cursor
+    const lx = eyeOffX + CUR.x * eyeW;
+    const ly = eyeOffY + CUR.y * eyeH;
+    cur.style.left = lx + 'px';
+    cur.style.top  = ly + 'px';
+    // Right eye cursor (mirror position)
+    const rx = eyeOffX + (isPortrait ? 0 : eyeW + divSize) + CUR.x * eyeW;
+    const ry = eyeOffY + (isPortrait ? eyeH + divSize : 0) + CUR.y * eyeH;
+    curR.style.left = rx + 'px';
+    curR.style.top  = ry + 'px';
+  } else {
+    // Single frame mode
+    const f = document.getElementById('sf');
+    const rect = f.getBoundingClientRect();
+    const mvRect = mv.getBoundingClientRect();
+    const px = rect.left - mvRect.left + CUR.x * rect.width;
+    const py = rect.top  - mvRect.top  + CUR.y * rect.height;
+    cur.style.left = px + 'px';
+    cur.style.top  = py + 'px';
+  }
+}
+
+// Fire a synthetic click at the cursor's current position in the iframe
+function cursorClick(frameEl) {
+  if (!frameEl) return;
+  try {
+    const doc = frameEl.contentWindow?.document;
+    if (!doc) return;
+    const rect = frameEl.getBoundingClientRect();
+    const scale = S.zoom / 100;
+    // Convert cursor normalized pos → actual iframe document coords
+    const ix = (CUR.x * rect.width)  / scale;
+    const iy = (CUR.y * rect.height) / scale;
+    const el = doc.elementFromPoint(ix, iy);
+    if (el) {
+      el.dispatchEvent(new MouseEvent('mouseover', {bubbles:true, clientX:ix, clientY:iy}));
+      el.dispatchEvent(new MouseEvent('mousedown', {bubbles:true, clientX:ix, clientY:iy}));
+      el.dispatchEvent(new MouseEvent('mouseup',   {bubbles:true, clientX:ix, clientY:iy}));
+      el.click();
+      // If it's a link, follow it
+      const link = el.closest('a[href]');
+      if (link) { try { link.click(); } catch {} }
+    }
+    // Flash cursor
+    const cur = document.getElementById('vcursor');
+    cur.classList.add('click');
+    setTimeout(() => cur.classList.remove('click'), 200);
+  } catch {}
+}
+
 // Standard Gamepad API button labels + auto-mapped default actions
 const BTN_META = [
-  { idx:0,  label:'A / Cross',       defaultAction:'Click Center'    },
+  { idx:0,  label:'A / Cross',       defaultAction:'Cursor Click'    },
   { idx:1,  label:'B / Circle',      defaultAction:'Navigate Back'   },
   { idx:2,  label:'X / Square',      defaultAction:'Toggle Crosshair'},
   { idx:3,  label:'Y / Triangle',    defaultAction:'Toggle VR'       },
@@ -761,8 +1092,8 @@ const BTN_META = [
   { idx:7,  label:'RT / R2',         defaultAction:'Zoom In'         },
   { idx:8,  label:'Select / Share',  defaultAction:'None'            },
   { idx:9,  label:'Start / Options', defaultAction:'Fullscreen'      },
-  { idx:10, label:'L-Stick Click',   defaultAction:'None'            },
-  { idx:11, label:'R-Stick Click',   defaultAction:'None'            },
+  { idx:10, label:'L3 (L-Stick)',    defaultAction:'None'            },
+  { idx:11, label:'R3 (R-Stick)',    defaultAction:'Toggle Game Mode'},
   { idx:12, label:'D-Pad ↑',         defaultAction:'Scroll Up'       },
   { idx:13, label:'D-Pad ↓',         defaultAction:'Scroll Down'     },
   { idx:14, label:'D-Pad ←',         defaultAction:'Scroll Left'     },
@@ -772,14 +1103,14 @@ const BTN_META = [
 const BTN_ACTIONS = [
   'None','Scroll Up','Scroll Down','Scroll Left','Scroll Right',
   'Zoom In','Zoom Out','Toggle VR','Navigate Back','Navigate Forward',
-  'Reload','Click Center','Toggle Crosshair','Fullscreen',
+  'Reload','Cursor Click','Click Center','Toggle Crosshair','Fullscreen',
+  'Toggle Game Mode','Toggle Cursor Mode',
 ];
 
 function autoMapController(gpIndex, buttonCount) {
   BTN_META.forEach(b => {
     if (b.idx >= buttonCount) return;
     const key = gpIndex + '_' + b.idx;
-    // Only auto-map if not already mapped by user
     if (!S.mappings[key]) S.mappings[key] = b.defaultAction;
   });
 }
@@ -803,23 +1134,76 @@ function setupGamepad() {
 
 function startPoll() {
   const prevBtns = {};
+  let gameDetectTick = 0;
+
   function poll() {
     const gps = navigator.getGamepads?.() || [];
     for (let i = 0; i < gps.length; i++) {
       const gp = gps[i]; if (!gp) continue;
       S.controllers[i] = gp;
       if (!prevBtns[i]) prevBtns[i] = new Array(gp.buttons.length).fill(false);
+
+      // ── Button actions ──────────────────────────────
       gp.buttons.forEach((btn, j) => {
-        if (btn.pressed && !prevBtns[i][j]) execAction(S.mappings[i+'_'+j] || 'None');
+        if (btn.pressed && !prevBtns[i][j]) {
+          // In game mode only allow Toggle Game Mode action
+          const action = S.mappings[i+'_'+j] || 'None';
+          if (CUR.gameMode && action !== 'Toggle Game Mode') {
+            // pass-through — don't consume
+          } else {
+            execAction(action, gp);
+          }
+        }
         prevBtns[i][j] = btn.pressed;
       });
-      // Left stick scroll
-      const lx = gp.axes[0]||0, ly = gp.axes[1]||0, DZ=0.15, SP=10;
-      const f = getFrame();
-      if (f && (Math.abs(lx)>DZ || Math.abs(ly)>DZ)) {
-        try { f.contentWindow?.scrollBy(lx*SP, ly*SP); } catch{}
+
+      if (!CUR.gameMode && S.cursorMode) {
+        // ── R-STICK = cursor (axes 2,3) ──────────────
+        const rx = gp.axes[2] || 0;
+        const ry = gp.axes[3] || 0;
+        const DZ = 0.12;
+        if (Math.abs(rx) > DZ || Math.abs(ry) > DZ) {
+          const spd = (S.cursorSpeed || 8) / 1000;
+          CUR.x = Math.max(0, Math.min(1, CUR.x + rx * spd * 16));
+          CUR.y = Math.max(0, Math.min(1, CUR.y + ry * spd * 16));
+          updateCursorPos();
+        }
+
+        // ── L-STICK = scroll (axes 0,1) ──────────────
+        const lx = gp.axes[0] || 0;
+        const ly = gp.axes[1] || 0;
+        const SP = S.scrollSpeed || 10;
+        if (Math.abs(lx) > DZ || Math.abs(ly) > DZ) {
+          // In VR mode scroll BOTH frames
+          if (S.vrMode) {
+            try { document.getElementById('fl').contentWindow?.scrollBy(lx*SP, ly*SP); } catch{}
+            try { document.getElementById('fr').contentWindow?.scrollBy(lx*SP, ly*SP); } catch{}
+          } else {
+            try { document.getElementById('sf').contentWindow?.scrollBy(lx*SP, ly*SP); } catch{}
+          }
+        }
+      } else if (!CUR.gameMode && !S.cursorMode) {
+        // Legacy scroll on L-stick when cursor mode off
+        const lx = gp.axes[0]||0, ly = gp.axes[1]||0, DZ=0.15, SP=S.scrollSpeed||10;
+        if (Math.abs(lx)>DZ || Math.abs(ly)>DZ) {
+          if (S.vrMode) {
+            try { document.getElementById('fl').contentWindow?.scrollBy(lx*SP, ly*SP); } catch{}
+            try { document.getElementById('fr').contentWindow?.scrollBy(lx*SP, ly*SP); } catch{}
+          } else {
+            try { document.getElementById('sf').contentWindow?.scrollBy(lx*SP, ly*SP); } catch{}
+          }
+        }
       }
     }
+
+    // Game mode auto-detect every ~120 frames (~2s)
+    gameDetectTick++;
+    if (gameDetectTick > 120) {
+      gameDetectTick = 0;
+      const gps2 = navigator.getGamepads?.() || [];
+      detectGameMode(gps2[0]);
+    }
+
     updateCtrlDisplay();
     S.pollId = requestAnimationFrame(poll);
   }
@@ -828,23 +1212,50 @@ function startPoll() {
 
 function stopPoll() { if (S.pollId) { cancelAnimationFrame(S.pollId); S.pollId = null; } }
 
-function execAction(action) {
-  const f = getFrame();
+function execAction(action, gp) {
   switch(action) {
-    case 'Scroll Up':          try{f?.contentWindow?.scrollBy(0,-200);}catch{} break;
-    case 'Scroll Down':        try{f?.contentWindow?.scrollBy(0,200);}catch{} break;
-    case 'Scroll Left':        try{f?.contentWindow?.scrollBy(-200,0);}catch{} break;
-    case 'Scroll Right':       try{f?.contentWindow?.scrollBy(200,0);}catch{} break;
-    case 'Zoom In':            document.getElementById('zoom').value=Math.min(200,S.zoom+10); updateZoom(document.getElementById('zoom')); break;
-    case 'Zoom Out':           document.getElementById('zoom').value=Math.max(50,S.zoom-10);  updateZoom(document.getElementById('zoom')); break;
-    case 'Toggle VR':          document.getElementById('tog-vr').click(); break;
-    case 'Navigate Back':      navBack(); break;
-    case 'Navigate Forward':   navFwd(); break;
-    case 'Reload':             doReload(); break;
-    case 'Toggle Crosshair':   document.getElementById('tog-xh').click(); break;
-    case 'Fullscreen':         requestFS(); break;
+    case 'Scroll Up':    scrollActive(0,-200); break;
+    case 'Scroll Down':  scrollActive(0,200);  break;
+    case 'Scroll Left':  scrollActive(-200,0); break;
+    case 'Scroll Right': scrollActive(200,0);  break;
+    case 'Zoom In':      document.getElementById('zoom').value=Math.min(200,S.zoom+10); updateZoom(document.getElementById('zoom')); break;
+    case 'Zoom Out':     document.getElementById('zoom').value=Math.max(50,S.zoom-10);  updateZoom(document.getElementById('zoom')); break;
+    case 'Toggle VR':    document.getElementById('tog-vr').click(); break;
+    case 'Navigate Back':    navBack(); break;
+    case 'Navigate Forward': navFwd();  break;
+    case 'Reload':           doReload(); break;
+    case 'Toggle Crosshair': document.getElementById('tog-xh').click(); break;
+    case 'Fullscreen':       requestFS(); break;
+    case 'Toggle Game Mode': setGameMode(!CUR.gameMode, 'MANUAL'); CUR.modeAutoDetected = false; break;
+    case 'Toggle Cursor Mode': document.getElementById('tog-cursor').click(); break;
+    case 'Cursor Click':
+      if (S.cursorMode && !CUR.gameMode) {
+        // Click in VR: both frames at cursor pos
+        if (S.vrMode) {
+          cursorClick(document.getElementById('fl'));
+          cursorClick(document.getElementById('fr'));
+        } else {
+          cursorClick(document.getElementById('sf'));
+        }
+      } else {
+        // Fallback click center
+        const f = getFrame();
+        if (f) try { f.contentWindow?.document?.elementFromPoint(f.clientWidth/2,f.clientHeight/2)?.click(); } catch{}
+      }
+      break;
     case 'Click Center':
-      if (f) try { const doc=f.contentWindow?.document; doc?.elementFromPoint(f.clientWidth/2,f.clientHeight/2)?.click(); } catch{} break;
+      const f = getFrame();
+      if (f) try { f.contentWindow?.document?.elementFromPoint(f.clientWidth/2,f.clientHeight/2)?.click(); } catch{}
+      break;
+  }
+}
+
+function scrollActive(dx, dy) {
+  if (S.vrMode) {
+    try { document.getElementById('fl').contentWindow?.scrollBy(dx,dy); } catch{}
+    try { document.getElementById('fr').contentWindow?.scrollBy(dx,dy); } catch{}
+  } else {
+    try { document.getElementById('sf').contentWindow?.scrollBy(dx,dy); } catch{}
   }
 }
 
