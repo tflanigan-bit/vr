@@ -966,96 +966,79 @@ function updateCursorPos() {
   }
 }
 
-// ── The actual click firer ───────────────────────────────────────
-// Strategy:
-//  1. Same-origin (translate.goog rewrite): elementFromPoint + real MouseEvents
-//  2. Cross-origin fallback: synthesise a pointer event at the iframe's
-//     screen coordinates so the browser dispatches it natively into the frame
+// ── The actual click firer ───────────────────────────────────────────
+// 1. Same-origin (translate.goog rewritten pages): full PointerEvent chain
+//    via elementFromPoint in the iframe document — reliable, navigates links.
+// 2. Cross-origin fallback: fire PointerEvent + MouseEvent at the iframe
+//    element at the exact screen coords — browser routes natively into frame.
 function fireCursorClick(frameEl) {
   if (!frameEl) return;
 
-  const rect  = frameEl.getBoundingClientRect();
-  const scale = S.zoom / 100;
-
-  // Where in the scaled iframe viewport the cursor sits (CSS pixels)
-  const vpX = CUR.x * rect.width;
-  const vpY = CUR.y * rect.height;
-
-  // Equivalent point inside the iframe's own document (unscaled)
-  const docX = vpX / scale;
-  const docY = vpY / scale;
-
-  // Absolute screen coords for native event injection
+  const rect   = frameEl.getBoundingClientRect();
+  const scale  = S.zoom / 100;
+  const vpX    = CUR.x * rect.width;
+  const vpY    = CUR.y * rect.height;
+  const docX   = vpX / scale;
+  const docY   = vpY / scale;
   const screenX = rect.left + vpX;
   const screenY = rect.top  + vpY;
 
-  // ── 1. Same-origin attempt ──────────────────────────────────
-  let sameOriginOk = false;
+  const makeOpts = (win) => ({
+    bubbles: true, cancelable: true,
+    view: win || window,
+    clientX: docX, clientY: docY,
+    screenX, screenY,
+    pointerType: 'mouse', isPrimary: true,
+  });
+
+  // ── 1. Same-origin ───────────────────────────────────────────────
+  let handled = false;
   try {
-    const doc = frameEl.contentWindow?.document;
+    const win = frameEl.contentWindow;
+    const doc = win?.document;
     if (doc) {
-      const el = doc.elementFromPoint(docX, docY);
-      if (el) {
-        const evOpts = {
-          bubbles: true, cancelable: true,
-          view: frameEl.contentWindow,
-          clientX: docX, clientY: docY,
-          screenX, screenY,
-        };
-        el.dispatchEvent(new PointerEvent('pointerover',  evOpts));
-        el.dispatchEvent(new PointerEvent('pointerenter', {...evOpts, bubbles:false}));
-        el.dispatchEvent(new MouseEvent('mouseover',      evOpts));
-        el.dispatchEvent(new PointerEvent('pointerdown',  evOpts));
-        el.dispatchEvent(new MouseEvent('mousedown',      evOpts));
-        el.dispatchEvent(new PointerEvent('pointerup',    evOpts));
-        el.dispatchEvent(new MouseEvent('mouseup',        evOpts));
-        el.dispatchEvent(new MouseEvent('click',          evOpts));
+      const target = doc.elementFromPoint(docX, docY);
+      if (target) {
+        const o = makeOpts(win);
+        target.dispatchEvent(new PointerEvent('pointerover',  o));
+        target.dispatchEvent(new MouseEvent  ('mouseover',    o));
+        target.dispatchEvent(new PointerEvent('pointerdown',  o));
+        target.dispatchEvent(new MouseEvent  ('mousedown',    o));
+        target.dispatchEvent(new PointerEvent('pointerup',    o));
+        target.dispatchEvent(new MouseEvent  ('mouseup',      o));
+        target.dispatchEvent(new MouseEvent  ('click',        o));
 
-        // If it's inside or IS a link, follow it
-        const link = el.closest?.('a[href]') || (el.tagName==='A' ? el : null);
-        if (link?.href) {
-          try { link.click(); } catch {}
-        }
+        const link = target.closest('a[href]') || (target.tagName === 'A' ? target : null);
+        if (link) try { link.click(); } catch {}
+        if (['INPUT','BUTTON','SELECT','TEXTAREA','A'].includes(target.tagName))
+          try { target.focus(); } catch {}
 
-        // If it's a button/input, focus it too
-        if (['BUTTON','INPUT','SELECT','TEXTAREA'].includes(el.tagName)) {
-          try { el.focus(); } catch {}
-        }
-
-        sameOriginOk = true;
+        handled = true;
       }
     }
-  } catch (_) { /* cross-origin — fall through */ }
+  } catch (_) { /* cross-origin */ }
 
-  // ── 2. Cross-origin: inject native pointer at screen coords ──
-  // We briefly make the iframe pointer-events:none, find the element
-  // in the PARENT that sits at those coords, restore, then re-dispatch
-  // at the true screen position. The browser routes it into the iframe.
-  if (!sameOriginOk) {
-    try {
-      // Temporarily disable iframe pointer capture so elementFromPoint
-      // in the parent can see *through* it (won't work — iframe is opaque,
-      // but we can still fire at the iframe's coords via the iframe element itself).
-      const evOpts = {
-        bubbles: true, cancelable: true,
-        clientX: screenX, clientY: screenY,
-        screenX, screenY,
-      };
-      // Fire on the iframe element itself — browser routes into frame
-      frameEl.dispatchEvent(new PointerEvent('pointerdown', evOpts));
-      frameEl.dispatchEvent(new MouseEvent ('mousedown',    evOpts));
-      frameEl.dispatchEvent(new PointerEvent('pointerup',   evOpts));
-      frameEl.dispatchEvent(new MouseEvent ('mouseup',      evOpts));
-      frameEl.dispatchEvent(new MouseEvent ('click',        evOpts));
-    } catch (_) {}
+  // ── 2. Cross-origin: fire at the iframe element at screen coords ─
+  if (!handled) {
+    const o = {
+      bubbles: true, cancelable: true,
+      clientX: screenX, clientY: screenY,
+      screenX, screenY,
+      pointerType: 'mouse', isPrimary: true,
+    };
+    try { frameEl.dispatchEvent(new PointerEvent('pointerdown', o)); } catch {}
+    try { frameEl.dispatchEvent(new MouseEvent  ('mousedown',   o)); } catch {}
+    try { frameEl.dispatchEvent(new PointerEvent('pointerup',   o)); } catch {}
+    try { frameEl.dispatchEvent(new MouseEvent  ('mouseup',     o)); } catch {}
+    try { frameEl.dispatchEvent(new MouseEvent  ('click',       o)); } catch {}
   }
 
-  // ── Flash cursor ────────────────────────────────────────────
+  // Flash
   ['vcursor','vcursor-r'].forEach(id => {
     const el = document.getElementById(id);
-    if (!el) return;
+    if (!el || !el.classList.contains('on')) return;
     el.classList.add('click');
-    setTimeout(() => el.classList.remove('click'), 200);
+    setTimeout(() => el.classList.remove('click'), 180);
   });
 }
 
@@ -1072,13 +1055,45 @@ function doClick() {
   setTimeout(() => document.getElementById('vcursor').classList.remove('click'), 200);
 }
 
-// ── Scroll both frames or single ──────────────────────
+// ── Scroll — fires WheelEvent at iframe screen coords ──────────────
+// contentWindow.scrollBy() is cross-origin blocked. Instead we fire
+// a real WheelEvent at the pixel where the cursor sits inside the frame.
+// The browser routes it natively into the iframe content.
+function scrollFrame(frameEl, dx, dy) {
+  if (!frameEl) return;
+
+  // First try same-origin (fastest, works on translate.goog rewrites)
+  try {
+    frameEl.contentWindow.scrollBy({ left: dx, top: dy, behavior: 'auto' });
+    return;
+  } catch (_) {}
+
+  // Cross-origin: synthesise a WheelEvent at the cursor's screen position
+  const rect = frameEl.getBoundingClientRect();
+  const cx = rect.left + CUR.x * rect.width;
+  const cy = rect.top  + CUR.y * rect.height;
+
+  const ev = new WheelEvent('wheel', {
+    bubbles:    true,
+    cancelable: true,
+    deltaMode:  WheelEvent.DOM_DELTA_PIXEL,
+    deltaX:     dx,
+    deltaY:     dy,
+    clientX:    cx,
+    clientY:    cy,
+    screenX:    cx,
+    screenY:    cy,
+    composed:   true,
+  });
+  frameEl.dispatchEvent(ev);
+}
+
 function scrollActive(dx, dy) {
   if (S.vrMode) {
-    try { document.getElementById('fl').contentWindow?.scrollBy(dx, dy); } catch {}
-    try { document.getElementById('fr').contentWindow?.scrollBy(dx, dy); } catch {}
+    scrollFrame(document.getElementById('fl'), dx, dy);
+    scrollFrame(document.getElementById('fr'), dx, dy);
   } else {
-    try { document.getElementById('sf').contentWindow?.scrollBy(dx, dy); } catch {}
+    scrollFrame(document.getElementById('sf'), dx, dy);
   }
 }
 
@@ -1292,20 +1307,29 @@ function startPoll() {
 
       if (!CUR.gameMode) {
         const DZ = 0.12;
+
+        // ── L-stick → scroll ─────────────────────────────────────
+        const lx = gp.axes[0] || 0;
+        const ly = gp.axes[1] || 0;
+        if (Math.abs(lx) > DZ || Math.abs(ly) > DZ) {
+          const SP = (S.scrollSpeed || 10) * 6; // px per frame (~60fps → feels right)
+          const sdx = Math.abs(lx) > DZ ? lx * SP : 0;
+          const sdy = Math.abs(ly) > DZ ? ly * SP : 0;
+          scrollActive(sdx, sdy);
+        }
+
+        // ── R-stick → move cursor ─────────────────────────────────
         if (S.cursorMode) {
-          // R-stick → move cursor
-          const rx = gp.axes[2] || 0, ry = gp.axes[3] || 0;
+          const rx = gp.axes[2] || 0;
+          const ry = gp.axes[3] || 0;
           if (Math.abs(rx) > DZ || Math.abs(ry) > DZ) {
-            const spd = (S.cursorSpeed || 8) / 800;
+            // speed: 0.002 base * cursorSpeed, feels like a real mouse
+            const spd = 0.002 * (S.cursorSpeed || 8);
             CUR.x = Math.max(0, Math.min(1, CUR.x + rx * spd * 16));
             CUR.y = Math.max(0, Math.min(1, CUR.y + ry * spd * 16));
             updateCursorPos();
           }
         }
-        // L-stick → scroll (always)
-        const lx = gp.axes[0] || 0, ly = gp.axes[1] || 0;
-        const SP = S.scrollSpeed || 10;
-        if (Math.abs(lx) > DZ || Math.abs(ly) > DZ) scrollActive(lx * SP, ly * SP);
       }
     }
 
