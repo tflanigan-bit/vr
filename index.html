@@ -50,12 +50,12 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .pnl-title::after{content:'';flex:1;height:1px;background:var(--border);}
 
 /* inputs */
-input[type=text],input[type=url]{width:100%;background:rgba(0,255,225,.05);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.75rem;padding:7px 9px;border-radius:4px;}
+input[type=text],input[type=url]{width:100%;background:rgba(0,255,225,.05);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.75rem;padding:7px 9px;border-radius:4px;outline:none;transition:border .15s,box-shadow .15s;}
 input[type=text]:focus,input[type=url]:focus{border-color:var(--neon);box-shadow:0 0 10px rgba(0,255,225,.18);}
 .row{display:flex;gap:6px;margin-bottom:6px;}
 .row input{margin:0;}
 
-.btn{background:transparent;border:1px solid var(--neon);color:var(--neon);font-family:'Rajdhani',sans-serif;font-size:.8rem;font-weight:600;padding:7px 11px;border-radius:4px;cursor:pointer;letter-spacing:.06em;transition:all .12s;}
+.btn{background:transparent;border:1px solid var(--neon);color:var(--neon);font-family:'Rajdhani',sans-serif;font-size:.8rem;font-weight:600;padding:7px 11px;border-radius:4px;cursor:pointer;letter-spacing:.05em;transition:all .2s;touch-action:manipulation;}
 .btn:hover,.btn:active{background:rgba(0,255,225,.1);box-shadow:0 0 12px rgba(0,255,225,.28);}
 .btn.pink{border-color:var(--neon2);color:var(--neon2);}
 .btn.pink:hover,.btn.pink:active{background:rgba(255,0,170,.1);}
@@ -71,7 +71,7 @@ input[type=text]:focus,input[type=url]:focus{border-color:var(--neon);box-shadow
 
 /* presets */
 .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
-.preset{background:var(--panel);border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:.64rem;padding:5px 8px;border-radius:4px;cursor:pointer;text-align:left;transition:all .1s;}
+.preset{background:var(--panel);border:1px solid var(--border);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:.64rem;padding:5px 8px;border-radius:4px;cursor:pointer;text-align:left;transition:all .2s;}
 .preset:hover,.preset:active{background:rgba(0,255,225,.07);border-color:rgba(0,255,225,.4);color:var(--neon);}
 
 /* sliders */
@@ -133,7 +133,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 /* HUD */
 #hud{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none;}
 #mv:hover #hud,#mv:focus-within #hud{opacity:1;pointer-events:all;}
-.hbtn{background:rgba(0,0,0,.8);border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.7rem;padding:5px 10px;border-radius:4px;cursor:pointer;background:rgba(0,0,0,.8);transition:all .1s;}
+.hbtn{background:rgba(0,0,0,.8);border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.7rem;padding:5px 10px;border-radius:4px;cursor:pointer;background:rgba(0,0,0,.8);transition:all .2s;}
 .hbtn:hover,.hbtn:active{border-color:var(--neon);color:var(--neon);}
 
 /* mobile HUD always visible */
@@ -149,7 +149,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 .xh-v{height:20px;width:1px;top:50%;left:50%;transform:translate(-50%,-50%);}
 
 /* gyro bar */
-#gyrobar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);border:1px solid var(--border);border-radius:4px;padding:6px 12px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--dim);display:none;flex-direction:row;gap:12px;z-index:50;}
+#gyrobar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);border:1px solid var(--border);border-radius:4px;padding:6px 12px;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--dim);display:none;gap:12px;z-index:45;}
 #gyrobar.on{display:flex;}
 
 /* loading */
@@ -160,7 +160,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 .load-txt{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--neon);letter-spacing:.08em;}
 
 /* notif */
-#notif{position:fixed;bottom:16px;right:16px;background:rgba(0,0,0,.9);border:1px solid var(--neon);color:var(--neon);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:8px 14px;border-radius:4px;z-index:1000;transform:translateY(120%);opacity:0;transition:all .2s;}
+#notif{position:fixed;bottom:16px;right:16px;background:rgba(0,0,0,.9);border:1px solid var(--neon);color:var(--neon);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:8px 14px;border-radius:4px;transform:translateY(150%);opacity:0;transition:all .3s;z-index:9000;}
 #notif.on{transform:translateY(0);opacity:1;}
 #notif.err{border-color:var(--fail);color:var(--fail);}
 #notif.warn{border-color:var(--warn);color:var(--warn);}
@@ -1003,13 +1003,12 @@ function doClick() {
     const x = CUR.x * f.clientWidth;
     const y = CUR.y * f.clientHeight;
     
-    const doc = f.contentWindow.document;
-    const el = doc.elementFromPoint(x, y);
-    
-    if (el) {
-      el.click();
-      notify('✓ Clicked');
-    }
+    // Dispatch custom event to iframe window
+    const event = new CustomEvent('VOID_CURSOR_CLICK', {
+      detail: { x, y }
+    });
+    f.contentWindow.dispatchEvent(event);
+    notify('✓ Clicked');
   } catch (e) {
     console.error('Click error:', e);
   }
@@ -1020,7 +1019,11 @@ function doScroll(amount) {
   if (!f || !f.contentWindow) return;
   
   try {
-    f.contentWindow.scrollBy(0, amount);
+    // Dispatch custom event to iframe window
+    const event = new CustomEvent('VOID_SCROLL', {
+      detail: { amount }
+    });
+    f.contentWindow.dispatchEvent(event);
   } catch (e) {
     console.error('Scroll error:', e);
   }
@@ -1073,101 +1076,72 @@ function toggleCursorMode() {
   document.getElementById('cursor-speed-row').style.display = S.cursorMode ? '' : 'none';
   document.getElementById('cursor-scroll-row').style.display = S.cursorMode ? '' : 'none';
   document.getElementById('cursor-info').style.display = S.cursorMode ? '' : 'none';
-  const cur = document.getElementById('vcursor');
-  const curR = document.getElementById('vcursor-r');
   if (S.cursorMode) {
+    document.getElementById('vcursor').classList.add('on');
+    document.getElementById('vcursor-r').classList.add('on');
     startGamepadPoll();
-    cur.classList.add('on');
-    if (S.vrMode) curR.classList.add('on');
-    notify('🕹️ Cursor mode ON — R-stick = cursor, L-stick = scroll, A = click');
+    notify('Cursor mode ON');
   } else {
+    document.getElementById('vcursor').classList.remove('on');
+    document.getElementById('vcursor-r').classList.remove('on');
     stopGamepadPoll();
-    cur.classList.remove('on');
-    curR.classList.remove('on');
     notify('Cursor mode OFF');
   }
 }
 
-function setGameMode(on, reason) {
-  CUR.gameMode = on;
+function detectGameMode(gp) {
+  // If a bumper (button 4 or 5) is pressed, enable game mode
+  const bumper = (gp.buttons[4]?.pressed || gp.buttons[5]?.pressed);
+  if (bumper && !CUR.modeAutoDetected) {
+    setGameMode(true, 'Auto-detected from bumper press');
+    CUR.modeAutoDetected = true;
+  } else if (!bumper && CUR.modeAutoDetected && CUR.gameMode) {
+    setGameMode(false, 'Released from game mode');
+    CUR.modeAutoDetected = false;
+  }
+}
+
+function setGameMode(enabled, reason) {
+  CUR.gameMode = enabled;
   const ind = document.getElementById('game-indicator');
-  if (on) {
-    ind.textContent = '🎮 GAME MODE — ' + (reason || 'BROWSE OFF');
+  if (enabled) {
     ind.classList.add('on');
-    document.getElementById('vcursor').classList.remove('on');
-    document.getElementById('vcursor-r').classList.remove('on');
-    notify('🎮 Game Mode ON — controller passed through. R3 to exit.', 'warn');
+    notify('🎮 Game mode ON (no cursor)', 'warn');
   } else {
     ind.classList.remove('on');
-    if (S.cursorMode) {
-      document.getElementById('vcursor').classList.add('on');
-      if (S.vrMode) document.getElementById('vcursor-r').classList.add('on');
-    }
-    notify('🌐 Browse Mode ON — cursor & scroll active');
-  }
-}
-
-function detectGameMode(gp) {
-  if (!S.cursorMode) return;
-  try {
-    const f = getFrame();
-    if (!f) return;
-    const doc = f.contentWindow?.document;
-    if (!doc) return;
-
-    const canvases = doc.querySelectorAll('canvas');
-    let hasFullCanvas = false;
-    canvases.forEach(c => {
-      const r = c.getBoundingClientRect();
-      if (r.width > f.clientWidth * 0.7 && r.height > f.clientHeight * 0.7) hasFullCanvas = true;
-    });
-
-    const pointerLocked = !!doc.pointerLockElement;
-    const title = (doc.title || '').toLowerCase();
-    const gameKeywords = ['fortnite', 'game', 'play', 'unity', 'unreal'];
-    const titleMatch = gameKeywords.some(k => title.includes(k));
-
-    const isGame = pointerLocked || hasFullCanvas || titleMatch;
-    if (isGame && !CUR.gameMode) {
-      setGameMode(true, 'Game detected');
-      CUR.modeAutoDetected = true;
-    } else if (!isGame && CUR.gameMode && CUR.modeAutoDetected) {
-      setGameMode(false, 'Game ended');
-      CUR.modeAutoDetected = false;
-    }
-  } catch (e) {
-    // Ignore errors from iframe access
+    notify('🎮 Browse mode ON (cursor visible)');
   }
 }
 
 // ══════════════════════════════════════════════════════
-// UTILITIES
+// HELPERS
 // ══════════════════════════════════════════════════════
+let _nt;
+function notify(msg, type) {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.className = 'on' + (type === 'err' ? ' err' : type === 'warn' ? ' warn' : '');
+  clearTimeout(_nt);
+  _nt = setTimeout(() => el.classList.remove('on'), 3500);
+}
+
 function dot(id, cls) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.className = 'dot ' + cls;
+  const d = document.getElementById(id);
+  if (!d) return;
+  d.className = 'dot' + (cls ? ' '+cls : '');
 }
 
 function showLoading(msg) {
-  const el = document.getElementById('loading');
-  document.getElementById('load-msg').textContent = msg;
-  el.classList.add('on');
+  document.getElementById('loading').classList.add('on');
+  document.getElementById('load-msg').textContent = msg || 'LOADING...';
 }
 
 function hideLoading() {
   document.getElementById('loading').classList.remove('on');
 }
 
-function notify(msg, type) {
-  const n = document.getElementById('notif');
-  n.textContent = msg;
-  n.className = 'on ' + (type || '');
-  setTimeout(() => { n.classList.remove('on'); }, 3000);
-}
-
-function toggleMenu() {
-  S.menuOpen = !S.menuOpen;
+function toggleMenu(force) {
+  S.menuOpen = typeof force === 'boolean' ? force : !S.menuOpen;
   document.getElementById('sb').classList.toggle('open', S.menuOpen);
   document.getElementById('sb-overlay').classList.toggle('on', S.menuOpen);
 }
@@ -1178,14 +1152,14 @@ function closeMobileMenu() {
   document.getElementById('sb-overlay').classList.remove('on');
 }
 
-// ══════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════
+// Init
 window.addEventListener('load', () => {
   renderProxyList();
   buildPresets();
   startGamepadPoll();
 });
+
+window.addEventListener('beforeunload', stopGamepadPoll);
 </script>
 </body>
 </html>
